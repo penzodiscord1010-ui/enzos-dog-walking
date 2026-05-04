@@ -183,6 +183,72 @@
   .earn-walk-info{color:#ccc;font-size:0.85rem;font-weight:600;}
   .earn-walk-info strong{color:white;}
   .earn-walk-amt{color:#52c794;font-weight:900;font-size:1rem;}
+
+  /* ── MOBILE ── */
+  .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;}
+  .hamburger span{display:block;width:24px;height:3px;background:var(--green);border-radius:2px;transition:all .3s;}
+  .hamburger.open span:nth-child(1){transform:translateY(8px) rotate(45deg);}
+  .hamburger.open span:nth-child(2){opacity:0;}
+  .hamburger.open span:nth-child(3){transform:translateY(-8px) rotate(-45deg);}
+  .mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:rgba(255,255,255,.98);backdrop-filter:blur(12px);border-bottom:2px solid var(--border);z-index:99;padding:12px 16px;flex-direction:column;gap:4px;box-shadow:0 8px 24px rgba(0,0,0,.1);}
+  .mobile-menu.open{display:flex;}
+  .mobile-menu a{text-decoration:none;color:var(--text);font-weight:700;font-size:1rem;padding:12px 16px;border-radius:12px;transition:background .2s;}
+  .mobile-menu a:hover,.mobile-menu a:active{background:var(--green-pale);color:var(--green);}
+  .mobile-menu .nav-cta{background:var(--green)!important;color:white!important;text-align:center;margin-top:4px;}
+
+  @media(max-width:600px){
+    /* Nav */
+    .nav-links{display:none;}
+    .hamburger{display:flex;}
+
+    /* Hero */
+    .hero{padding:40px 16px 36px;}
+    .hero-emoji{font-size:2.8rem;}
+    .hero-desc{font-size:0.95rem;padding:14px 16px;}
+    .btn-primary{padding:14px 24px;font-size:1rem;width:100%;text-align:center;}
+    .hero-badges{gap:7px;}
+    .badge{font-size:0.78rem;padding:4px 10px;}
+
+    /* Sections */
+    section{padding:36px 14px;}
+    .section-title{font-size:1.4rem;}
+
+    /* Services */
+    .services-grid{grid-template-columns:1fr;}
+    .service-add{grid-column:auto;}
+
+    /* Calendar */
+    .cal-day{min-height:42px;font-size:0.78rem;padding:4px 2px 2px;}
+    .cal-time{font-size:0.48rem;}
+    .cal-day-name{font-size:0.65rem;padding:6px 2px;}
+
+    /* Forms */
+    .form-row{grid-template-columns:1fr;}
+    input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],select,textarea{font-size:1rem;padding:13px 14px;}
+    .btn-submit{font-size:1rem;padding:16px;}
+    .cpref-btn{padding:12px 8px;font-size:0.85rem;}
+
+    /* Payment */
+    .payment-options{grid-template-columns:1fr 1fr;}
+    .pay-card{font-size:0.85rem;padding:12px 6px;}
+
+    /* Contact */
+    .contact-cards{grid-template-columns:1fr;}
+
+    /* Admin */
+    .sub-grid{grid-template-columns:1fr;}
+    .sub-item[style*="grid-column"]{grid-column:auto!important;}
+    .earn-stats{grid-template-columns:1fr 1fr;}
+
+    /* FAQ cards */
+    #faq section, #reviews section{padding:36px 14px;}
+
+    /* Map */
+    #area iframe{height:260px;}
+
+    /* General cards spacing */
+    .safety-list li{padding:12px 14px;}
+  }
 </style>
 </head>
 <body>
@@ -199,7 +265,22 @@
     <a href="#contact">Contact</a>
     <a href="#booking" class="nav-cta">Book Now</a>
   </div>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#services" onclick="closeMenu()">🦴 Services</a>
+  <a href="#availability" onclick="closeMenu()">📅 Calendar</a>
+  <a href="#about" onclick="closeMenu()">👋 About Me</a>
+  <a href="#safety" onclick="closeMenu()">🛡️ Safety</a>
+  <a href="#faq" onclick="closeMenu()">❓ FAQ</a>
+  <a href="#area" onclick="closeMenu()">📍 Service Area</a>
+  <a href="#reviews" onclick="closeMenu()">⭐ Reviews</a>
+  <a href="#contact" onclick="closeMenu()">📬 Contact</a>
+  <a href="#booking" onclick="closeMenu()" class="nav-cta">🐾 Book Now</a>
+</div>
 
 <!-- HERO -->
 <div class="hero">
@@ -954,6 +1035,24 @@ function calNext() {
 }
 
 renderCalendar();
+
+// ── Mobile menu ──
+function toggleMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const btn = document.getElementById('hamburger');
+  menu.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  const menu = document.getElementById('mobileMenu');
+  const btn = document.getElementById('hamburger');
+  if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) closeMenu();
+});
+
 function adminLogin() {
   if (document.getElementById('adminPassInput').value === PASS) {
     document.getElementById('adminLoginBox').style.display = 'none';
