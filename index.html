@@ -971,41 +971,6 @@ async function submitBooking(e) {
   subs.unshift(sub);
   save();
   renderSubs();
-
-  // ── Send email via EmailJS ──
-  const emailReady = EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY'
-                  && EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID'
-                  && EMAILJS_TEMPLATE_ID !== 'YOUR_TEMPLATE_ID';
-
-  if (emailReady && typeof emailjs !== 'undefined') {
-    const templateParams = {
-      to_email:       ENZO_EMAIL,
-      owner_name:     sub.ownerName,
-      dog_name:       sub.dogName,
-      contact_pref:   pref === 'phone' ? '📞 Phone/Text' : '✉️ Email',
-      contact:        sub.contact,
-      dog_size:       sub.dogSize,
-      dog_notes:      sub.dogNotes || '—',
-      date:           sub.date,
-      time:           sub.time,
-      walk_length:    wl === '30min' ? '30 minutes ($20)' : '20 minutes ($15)',
-      num_dogs:       sub.numDogs,
-      price:          '$' + sub.price,
-      address:        sub.address,
-      payment_method: sub.paymentMethod,
-      extra_notes:    sub.extraNotes || '—',
-      submitted,
-    };
-    try {
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-      console.log('📧 Email sent to Enzo!');
-    } catch (err) {
-      console.warn('EmailJS send failed:', err);
-    }
-  } else if (!emailReady) {
-    console.warn('EmailJS not configured yet — booking saved locally only.');
-  }
-
   f.reset();
   setContactPref('phone');
   const msg = document.getElementById('successMsg');
