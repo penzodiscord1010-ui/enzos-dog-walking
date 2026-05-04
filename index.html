@@ -754,7 +754,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 const PASS = '@Penzo0425';
-let subs = [];
+let subs = JSON.parse(localStorage.getItem('enzos_subs') || '[]');
 let charts = {};
 
 // ── Contact pref ──
@@ -769,56 +769,41 @@ function setContactPref(pref) {
 }
 setContactPref('phone');
 
-// ── Price calc ──
 function calcPrice(wl, nd) {
   return (wl==='30min'?20:15) + (parseInt(nd)>=2?5:0);
 }
 
-// ── Update price display ──
-function updatePrice() {
-  const wl = document.querySelector('[name=walkLength]') ? document.querySelector('[name=walkLength]').value : '20min';
-  const nd = document.querySelector('[name=numDogs]') ? document.querySelector('[name=numDogs]').value : '1';
-  const p = calcPrice(wl, nd);
-  const el = document.getElementById('priceDisplay');
-  if (el) el.textContent = '$' + p;
-}
-
-// ── Submit via Formspree ──
 async function handleSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('submitBtn');
   const f = e.target;
-
   const pref = f.contactPref.value;
   const contact = pref==='phone' ? f.phone.value : f.email.value;
-  if (!contact) {
-    alert('Please enter your ' + (pref==='phone' ? 'phone number' : 'email') + '!');
-    return;
-  }
+  if (!contact) { alert('Please enter your ' + (pref==='phone' ? 'phone number' : 'email') + '!'); return; }
 
   btn.disabled = true;
   btn.textContent = '⏳ Sending...';
 
   const wl = f.walkLength.value, nd = f.numDogs.value;
   const price = calcPrice(wl, nd);
+  const submitted = new Date().toLocaleString();
 
-  // Build form data for Formspree
   const data = {
-    'Owner Name':     f.ownerName.value,
-    'Dog Name':       f.dogName.value,
-    'Contact Pref':   pref === 'phone' ? 'Phone/Text' : 'Email',
-    'Contact':        contact,
-    'Dog Size':       f.dogSize.value,
-    'Dog Notes':      f.dogNotes.value || '—',
-    'Date':           f.date.value,
-    'Time':           f.time.value,
-    'Walk Length':    wl === '30min' ? '30 min ($20)' : '20 min ($15)',
-    'Num Dogs':       nd,
-    'Total Price':    '$' + price,
-    'Address':        f.address.value,
+    'Owner Name': f.ownerName.value,
+    'Dog Name': f.dogName.value,
+    'Contact Pref': pref === 'phone' ? 'Phone/Text' : 'Email',
+    'Contact': contact,
+    'Dog Size': f.dogSize.value,
+    'Dog Notes': f.dogNotes.value || '—',
+    'Date': f.date.value,
+    'Time': f.time.value,
+    'Walk Length': wl === '30min' ? '30 min ($20)' : '20 min ($15)',
+    'Num Dogs': nd,
+    'Total Price': '$' + price,
+    'Address': f.address.value,
     'Payment Method': f.paymentMethod.value,
-    'Extra Notes':    f.extraNotes.value || '—',
-    'Submitted':      new Date().toLocaleString(),
+    'Extra Notes': f.extraNotes.value || '—',
+    'Submitted': submitted,
   };
 
   try {
@@ -828,10 +813,9 @@ async function handleSubmit(e) {
       body: JSON.stringify(data)
     });
     const result = await res.json();
-    if (result.ok || res.ok) {
-      // Also save locally for admin panel
+    if (res.ok) {
       const sub = {
-        id: Date.now(), submitted: data['Submitted'], status: 'pending',
+        id: Date.now(), submitted, status: 'pending',
         ownerName: f.ownerName.value, dogName: f.dogName.value,
         contactPref: pref, contact, dogSize: f.dogSize.value,
         dogNotes: f.dogNotes.value, date: f.date.value, time: f.time.value,
@@ -847,138 +831,20 @@ async function handleSubmit(e) {
       msg.style.display = 'block';
       setTimeout(() => msg.style.display = 'none', 6000);
     } else {
-      alert('Something went wrong. Please try again!');
+      alert('Something went wrong: ' + (result.error || 'please try again'));
     }
   } catch(err) {
     alert('Could not send. Check your internet and try again!');
-    console.warn(err);
   }
 
   btn.disabled = false;
   btn.textContent = '🐾 Send Walk Request!';
 }
 
-// ── Render submissions ──
-function renderSubs() {
-  const el = document.getElementById('submissionsList');
-  if (!el) return;
-  if (!subs.length) { el.innerHTML='<div class="no-subs">No booking requests yet 🐾</div>'; return; }
-  el.innerHTML = subs.map(s => {
-    const sc = s.status==='confirmed'?'s-confirmed':s.status==='denied'?'s-denied':'s-pending';
-    const st = s.status==='confirmed'?'✅ Confirmed':s.status==='denied'?'❌ Denied':'⏳ Pending';
-    const ci = s.contactPref==='phone'?'📞':'✉️';
-    const wlLabel = s.walkLength==='30min'?'30 min':'20 min';
-    return `<div class="sub-card" id="sc-${s.id}">
-      <div class="sub-header">
-        <span class="sub-name">🐕 ${s.dogName} — ${s.ownerName}</span>
-        <span class="status-badge ${sc}">${st}</span>
-      </div>
-      <div class="sub-grid">
-        <div class="sub-item"><strong>${ci} Contact:</strong> ${s.contact}</div>
-        <div class="sub-item"><strong>Dog Size:</strong> ${s.dogSize}</div>
-        <div class="sub-item"><strong>Date:</strong> ${s.date}</div>
-        <div class="sub-item"><strong>Time:</strong> ${s.time}</div>
-        <div class="sub-item"><strong>Walk:</strong> ${wlLabel}</div>
-        <div class="sub-item"><strong>Dogs:</strong> ${s.numDogs}</div>
-        <div class="sub-item"><strong>💵 Total:</strong> $${s.price}</div>
-        <div class="sub-item"><strong>Payment:</strong> ${s.paymentMethod||'—'}</div>
-        <div class="sub-item" style="grid-column:1/-1"><strong>Address:</strong> ${s.address}</div>
-        ${s.dogNotes?`<div class="sub-item" style="grid-column:1/-1"><strong>Dog Notes:</strong> ${s.dogNotes}</div>`:''}
-        ${s.extraNotes?`<div class="sub-item" style="grid-column:1/-1"><strong>Extra Notes:</strong> ${s.extraNotes}</div>`:''}
-        <div class="sub-item" style="grid-column:1/-1;color:var(--muted);font-size:.77rem;">Submitted: ${s.submitted}</div>
-      </div>
-      <div class="sub-actions">
-        ${s.status!=='confirmed'?`<button class="btn-confirm" onclick="setStatus(${s.id},'confirmed')">✅ Confirm</button>`:''}
-        ${s.status!=='denied'?`<button class="btn-deny" onclick="setStatus(${s.id},'denied')">❌ Deny</button>`:''}
-        <button class="btn-del" onclick="deleteSub(${s.id})">🗑️ Delete</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function setStatus(id, status) {
-  const i = subs.findIndex(s=>s.id===id);
-  if (i===-1) return;
-  subs[i].status = status;
+function save() {
   localStorage.setItem('enzos_subs', JSON.stringify(subs));
-  renderSubs();
 }
 
-function deleteSub(id) {
-  if (!confirm('Delete this request?')) return;
-  subs = subs.filter(s=>s.id!==id);
-  localStorage.setItem('enzos_subs', JSON.stringify(subs));
-  renderSubs();
-}
-
-function clearAll() {
-  if (!confirm('Clear ALL requests? Cannot be undone!')) return;
-  subs = [];
-  localStorage.setItem('enzos_subs', JSON.stringify(subs));
-  renderSubs();
-}
-
-// Load saved subs on page load
-subs = JSON.parse(localStorage.getItem('enzos_subs') || '[]');
-function save() { localStorage.setItem('enzos_subs', JSON.stringify(subs)); }
-
-// ── Contact pref ──
-function setContactPref(pref) {
-  document.getElementById('contactPrefVal').value = pref;
-  document.getElementById('prefPhoneBtn').classList.toggle('active', pref==='phone');
-  document.getElementById('prefEmailBtn').classList.toggle('active', pref==='email');
-  document.getElementById('phoneField').style.display = pref==='phone'?'block':'none';
-  document.getElementById('emailField').style.display = pref==='email'?'block':'none';
-  document.getElementById('phoneInput').required = pref==='phone';
-  document.getElementById('emailInput').required = pref==='email';
-}
-setContactPref('phone');
-
-// ── Price calc ──
-function calcPrice(wl, nd) {
-  return (wl==='30min'?20:15) + (parseInt(nd)>=2?5:0);
-}
-
-// ── Submit booking ──
-async function submitBooking(e) {
-  e.preventDefault();
-  const f = e.target;
-  const pref = f.contactPref.value;
-  const contact = pref==='phone' ? f.phone.value : f.email.value;
-  if (!contact) { alert('Please enter your '+(pref==='phone'?'phone number':'email')+'!'); return; }
-  const wl = f.walkLength.value, nd = f.numDogs.value;
-  const price = calcPrice(wl, nd);
-  const submitted = new Date().toLocaleString();
-  const sub = {
-    id: Date.now(),
-    submitted,
-    status: 'pending',
-    ownerName: f.ownerName.value,
-    dogName: f.dogName.value,
-    contactPref: pref,
-    contact,
-    dogSize: f.dogSize.value,
-    dogNotes: f.dogNotes.value,
-    date: f.date.value,
-    time: f.time.value,
-    walkLength: wl,
-    numDogs: nd,
-    price,
-    address: f.address.value,
-    paymentMethod: f.paymentMethod.value,
-    extraNotes: f.extraNotes.value,
-  };
-  subs.unshift(sub);
-  save();
-  renderSubs();
-  f.reset();
-  setContactPref('phone');
-  const msg = document.getElementById('successMsg');
-  msg.style.display = 'block';
-  setTimeout(()=>msg.style.display='none', 6000);
-}
-
-// ── Render submissions ──
 function renderSubs() {
   const el = document.getElementById('submissionsList');
   if (!el) return;
@@ -1022,17 +888,19 @@ function setStatus(id, status) {
   subs[i].status = status;
   save(); renderSubs();
 }
+
 function deleteSub(id) {
   if (!confirm('Delete this request?')) return;
   subs = subs.filter(s=>s.id!==id);
   save(); renderSubs();
 }
+
 function clearAll() {
   if (!confirm('Clear ALL requests? Cannot be undone!')) return;
   subs = []; save(); renderSubs();
 }
 
-// ── Dynamic Calendar ──
+// // ── Dynamic Calendar ──
 // Availability pattern: every other week starting Mon May 5 2025
 // Week ON: Mon May 5 – Sun May 11, then Mon May 19 – Sun May 25, etc. (every 2 weeks)
 const ANCHOR_MON = new Date(2025, 4, 5); // May 5 2025 — first Monday of first ON week
