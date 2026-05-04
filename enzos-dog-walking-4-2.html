@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enzo's Dog Walking | Hillsdale, Portland</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green:#3d9970;--green-light:#52c794;--green-pale:#e8f7f0;
+    --blue:#2980b9;--blue-light:#5dade2;--blue-pale:#eaf4fb;
+    --teal:#1abc9c;--dark:#1a2e25;--text:#2c3e50;--muted:#7f8c8d;
+    --bg:#f9fffe;--card:#ffffff;--border:#d5ece4;
+    --radius:18px;--shadow:0 4px 24px rgba(61,153,112,.10);
+    --shadow-hover:0 8px 32px rgba(61,153,112,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;}
+
+  /* NAV */
+  nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:2px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:60px;}
+  .nav-logo{font-family:'Pacifico',cursive;font-size:1.4rem;color:var(--green);text-decoration:none;}
+  .nav-links{display:flex;gap:6px;flex-wrap:wrap;}
+  .nav-links a{text-decoration:none;color:var(--text);font-weight:700;font-size:0.82rem;padding:6px 10px;border-radius:50px;transition:background .2s,color .2s;}
+  .nav-links a:hover{background:var(--green-pale);color:var(--green);}
+  .nav-cta{background:var(--green)!important;color:white!important;padding:7px 14px!important;}
+  .nav-cta:hover{background:var(--green-light)!important;}
+
+  /* HERO */
+  .hero{background:linear-gradient(135deg,#e8f7f0 0%,#eaf4fb 50%,#e8f7f0 100%);padding:60px 20px 50px;text-align:center;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;background:radial-gradient(circle,rgba(82,199,148,.18),transparent 70%);border-radius:50%;}
+  .hero::after{content:'';position:absolute;bottom:-40px;left:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(93,173,226,.15),transparent 70%);border-radius:50%;}
+  .hero-emoji{font-size:3.5rem;display:block;margin-bottom:10px;animation:bounce 2s infinite;}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .hero h1{font-family:'Pacifico',cursive;font-size:clamp(2rem,8vw,3.2rem);color:var(--green);margin-bottom:8px;line-height:1.2;}
+  .hero-sub{font-size:1.05rem;color:var(--muted);font-weight:600;margin-bottom:16px;}
+  .hero-desc{max-width:520px;margin:0 auto 28px;font-size:1.05rem;color:var(--text);font-weight:600;background:white;border-radius:var(--radius);padding:16px 20px;box-shadow:var(--shadow);border-left:4px solid var(--green);}
+  .btn-primary{display:inline-block;background:linear-gradient(135deg,var(--green),var(--teal));color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:1.05rem;padding:14px 32px;border-radius:50px;text-decoration:none;border:none;cursor:pointer;box-shadow:0 4px 18px rgba(61,153,112,.30);transition:transform .2s,box-shadow .2s;}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(61,153,112,.38);}
+  .hero-badges{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:22px;}
+  .badge{background:white;border:2px solid var(--border);border-radius:50px;padding:5px 14px;font-size:0.82rem;font-weight:700;color:var(--green);}
+
+  /* SECTIONS */
+  section{padding:50px 20px;max-width:700px;margin:0 auto;}
+  .section-title{font-family:'Pacifico',cursive;font-size:1.7rem;color:var(--green);margin-bottom:6px;text-align:center;}
+  .section-sub{text-align:center;color:var(--muted);font-weight:600;font-size:0.95rem;margin-bottom:28px;}
+
+  /* SERVICES */
+  .services-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:480px){.services-grid{grid-template-columns:1fr;}}
+  .service-card{background:var(--card);border-radius:var(--radius);border:2px solid var(--border);padding:20px 18px;box-shadow:var(--shadow);transition:box-shadow .2s,transform .2s;text-align:center;}
+  .service-card:hover{box-shadow:var(--shadow-hover);transform:translateY(-3px);}
+  .service-emoji{font-size:2rem;display:block;margin-bottom:8px;}
+  .service-name{font-weight:800;font-size:1rem;color:var(--dark);margin-bottom:4px;}
+  .service-price{font-size:1.5rem;font-weight:900;color:var(--green);}
+  .service-note{font-size:0.82rem;color:var(--muted);font-weight:600;margin-top:4px;}
+  .service-add{grid-column:1/-1;background:linear-gradient(135deg,var(--green-pale),var(--blue-pale));border-color:var(--green-light);}
+
+  /* AVAILABILITY */
+  .avail-info{background:var(--card);border-radius:var(--radius);border:2px solid var(--border);padding:20px;box-shadow:var(--shadow);margin-bottom:18px;}
+  .avail-info p{font-weight:600;color:var(--text);margin-bottom:8px;}
+  .avail-week{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+  .avail-chip{padding:5px 14px;border-radius:50px;font-size:0.85rem;font-weight:700;}
+  .chip-green{background:var(--green-pale);color:var(--green);border:2px solid var(--green-light);}
+  .chip-blue{background:var(--blue-pale);color:var(--blue);border:2px solid var(--blue-light);}
+
+  /* CALENDAR */
+  .calendar{background:var(--card);border-radius:var(--radius);border:2px solid var(--border);box-shadow:var(--shadow);overflow:hidden;}
+  .cal-header{background:linear-gradient(135deg,var(--green),var(--teal));color:white;padding:14px 20px;text-align:center;font-weight:800;font-size:1.1rem;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);}
+  .cal-day-name{padding:8px 2px;text-align:center;font-size:0.72rem;font-weight:800;color:var(--muted);border-bottom:2px solid var(--border);}
+  .cal-day{min-height:52px;padding:5px 3px 3px;text-align:center;font-size:0.88rem;font-weight:700;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+  .cal-day.empty{background:#fafafa;}
+  .cal-day.avail-wd{background:#e8f7f0;color:var(--green);}
+  .cal-day.avail-we{background:#eaf4fb;color:var(--blue);}
+  .cal-day.off{color:#ccc;background:#fafafa;}
+  .cal-time{font-size:0.56rem;font-weight:700;display:block;margin-top:2px;line-height:1.15;}
+  .cal-legend{display:flex;gap:14px;flex-wrap:wrap;padding:12px 16px;border-top:2px solid var(--border);font-size:0.8rem;font-weight:700;color:var(--muted);}
+  .cal-legend span{display:flex;align-items:center;gap:5px;}
+  .legend-box{width:14px;height:14px;border-radius:4px;flex-shrink:0;}
+
+  /* BOOKING FORM */
+  .booking-note{background:linear-gradient(135deg,#fff8e1,#fff3cd);border:2px solid #ffd54f;border-radius:var(--radius);padding:14px 18px;font-weight:700;font-size:0.92rem;color:#7d5a00;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start;}
+  .form-card{background:var(--card);border-radius:var(--radius);border:2px solid var(--border);padding:24px 20px;box-shadow:var(--shadow);}
+  .form-group{margin-bottom:16px;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:480px){.form-row{grid-template-columns:1fr;}}
+  label{display:block;font-weight:800;font-size:0.88rem;color:var(--dark);margin-bottom:5px;}
+  label .req{color:var(--green);}
+  input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],select,textarea{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:600;color:var(--text);background:#fafffe;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green-light);box-shadow:0 0 0 3px rgba(82,199,148,.15);}
+  textarea{resize:vertical;min-height:80px;}
+
+  /* CONTACT PREF */
+  .cpref-row{display:flex;gap:10px;margin-bottom:12px;}
+  .cpref-btn{flex:1;padding:10px;border:2px solid var(--border);border-radius:12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;background:#fafffe;color:var(--muted);cursor:pointer;transition:all .2s;}
+  .cpref-btn.active{border-color:var(--green-light);background:var(--green-pale);color:var(--green);box-shadow:0 0 0 3px rgba(82,199,148,.15);}
+
+  /* PAYMENT */
+  .payment-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .pay-opt{cursor:pointer;}
+  .pay-opt input[type=radio]{display:none;}
+  .pay-card{display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 10px;border:2px solid var(--border);border-radius:14px;font-weight:800;font-size:0.95rem;color:var(--text);background:#fafffe;transition:all .2s;cursor:pointer;user-select:none;}
+  .pay-opt input[type=radio]:checked+.pay-card{border-color:var(--green-light);background:var(--green-pale);color:var(--green);box-shadow:0 0 0 3px rgba(82,199,148,.15);}
+  .pay-card:hover{border-color:var(--green-light);background:var(--green-pale);}
+
+  .btn-submit{width:100%;padding:15px;background:linear-gradient(135deg,var(--green),var(--teal));color:white;font-family:'Nunito',sans-serif;font-weight:900;font-size:1.1rem;border:none;border-radius:50px;cursor:pointer;box-shadow:0 4px 18px rgba(61,153,112,.30);transition:transform .2s,box-shadow .2s;margin-top:8px;}
+  .btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(61,153,112,.38);}
+  .success-msg{display:none;background:var(--green-pale);border:2px solid var(--green-light);border-radius:var(--radius);padding:20px;text-align:center;font-weight:800;color:var(--green);font-size:1rem;margin-top:16px;}
+
+  /* SAFETY */
+  .safety-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+  .safety-list li{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;box-shadow:var(--shadow);font-weight:700;}
+  .safety-icon{font-size:1.4rem;flex-shrink:0;}
+
+  /* CONTACT */
+  .contact-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:400px){.contact-cards{grid-template-columns:1fr;}}
+  .contact-card{background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;box-shadow:var(--shadow);transition:box-shadow .2s,transform .2s;text-decoration:none;color:var(--text);display:block;}
+  .contact-card:hover{box-shadow:var(--shadow-hover);transform:translateY(-3px);}
+  .contact-icon{font-size:2rem;display:block;margin-bottom:8px;}
+  .contact-label{font-weight:700;color:var(--muted);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;}
+  .contact-value{font-weight:800;color:var(--green);font-size:1rem;word-break:break-all;}
+
+  /* ADMIN */
+  #admin-section{background:#f0faf6;border-top:3px dashed var(--green-light);padding:40px 20px;}
+  #admin-section .inner{max-width:700px;margin:0 auto;}
+  .admin-login-box{background:white;border:2px solid var(--border);border-radius:var(--radius);padding:24px;max-width:340px;margin:0 auto;box-shadow:var(--shadow);text-align:center;}
+  .admin-login-box h3{font-family:'Pacifico',cursive;color:var(--green);margin-bottom:10px;}
+  .admin-login-box p{color:var(--muted);font-size:0.88rem;margin-bottom:14px;font-weight:600;}
+  .submissions-list{display:flex;flex-direction:column;gap:12px;margin-top:16px;}
+  .sub-card{background:white;border:2px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);font-size:0.88rem;}
+  .sub-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+  .sub-name{font-weight:900;color:var(--green);font-size:1rem;}
+  .sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin-bottom:10px;}
+  .sub-item{color:var(--text);font-weight:600;}
+  .sub-item strong{color:var(--dark);}
+  .sub-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn-confirm{background:var(--green);color:white;border:none;border-radius:50px;padding:7px 18px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;transition:background .2s;}
+  .btn-confirm:hover{background:var(--green-light);}
+  .btn-deny{background:#e74c3c;color:white;border:none;border-radius:50px;padding:7px 18px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;}
+  .btn-deny:hover{background:#c0392b;}
+  .btn-del{background:transparent;color:var(--muted);border:2px solid var(--border);border-radius:50px;padding:7px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;transition:all .2s;}
+  .btn-del:hover{color:#e74c3c;border-color:#e74c3c;}
+  .status-badge{display:inline-block;border-radius:50px;padding:3px 12px;font-size:0.78rem;font-weight:800;}
+  .s-pending{background:#fff3cd;color:#856404;border:1.5px solid #ffc107;}
+  .s-confirmed{background:var(--green-pale);color:var(--green);border:1.5px solid var(--green-light);}
+  .s-denied{background:#fde8e8;color:#c0392b;border:1.5px solid #f5c6cb;}
+  .no-subs{color:var(--muted);font-weight:700;text-align:center;padding:20px;}
+  .admin-btn{background:white;border:2px solid var(--border);border-radius:50px;padding:8px 20px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;color:var(--green);cursor:pointer;transition:background .2s;margin-right:8px;margin-top:8px;}
+  .admin-btn:hover{background:var(--green-pale);}
+
+  /* FOOTER */
+  footer{background:var(--dark);color:#aaa;text-align:center;padding:24px 20px;font-size:0.85rem;font-weight:600;}
+  footer strong{color:var(--green-light);}
+  .divider{height:3px;background:linear-gradient(90deg,var(--green-light),var(--blue-light));border:none;margin:0;opacity:.3;}
+
+  /* EARNINGS OVERLAY */
+  #earn-overlay{display:none;position:fixed;inset:0;background:rgba(20,35,28,.97);z-index:9999;overflow-y:auto;padding:28px 20px;}
+  #earn-overlay.show{display:block;}
+  .earn-inner{max-width:680px;margin:0 auto;}
+  .earn-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;}
+  .earn-title{font-family:'Pacifico',cursive;color:#52c794;font-size:1.8rem;}
+  .earn-close{background:transparent;border:2px solid #666;color:#aaa;border-radius:50px;padding:7px 18px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;font-size:0.9rem;transition:all .2s;}
+  .earn-close:hover{border-color:white;color:white;}
+  .earn-login{max-width:340px;margin:50px auto;background:rgba(255,255,255,.05);border:2px solid rgba(82,199,148,.3);border-radius:var(--radius);padding:28px;text-align:center;}
+  .earn-login h2{font-family:'Pacifico',cursive;color:#52c794;margin-bottom:8px;}
+  .earn-login p{color:#aaa;font-size:0.88rem;margin-bottom:16px;font-weight:600;}
+  .earn-login input{width:100%;padding:11px 14px;border:2px solid rgba(82,199,148,.3);border-radius:12px;background:rgba(255,255,255,.07);color:white;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;margin-bottom:12px;}
+  .earn-login input::placeholder{color:#555;}
+  .earn-login-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--green),var(--teal));color:white;font-family:'Nunito',sans-serif;font-weight:900;font-size:1rem;border:none;border-radius:50px;cursor:pointer;}
+  .earn-err{color:#e74c3c;font-size:0.85rem;font-weight:700;margin-top:8px;display:none;}
+  .earn-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:22px;}
+  @media(max-width:480px){.earn-stats{grid-template-columns:1fr 1fr;}}
+  .earn-stat{background:rgba(255,255,255,.07);border:1.5px solid rgba(82,199,148,.25);border-radius:16px;padding:16px;text-align:center;}
+  .earn-stat-val{font-size:1.7rem;font-weight:900;color:#52c794;display:block;}
+  .earn-stat-lbl{font-size:0.8rem;font-weight:700;color:#888;margin-top:2px;}
+  .earn-box{background:rgba(255,255,255,.05);border:1.5px solid rgba(82,199,148,.18);border-radius:16px;padding:18px;margin-bottom:18px;}
+  .earn-box-title{color:#52c794;font-weight:800;margin-bottom:14px;font-size:0.95rem;}
+  .earn-walks-list{display:flex;flex-direction:column;gap:8px;}
+  .earn-walk-row{background:rgba(255,255,255,.06);border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
+  .earn-walk-info{color:#ccc;font-size:0.85rem;font-weight:600;}
+  .earn-walk-info strong{color:white;}
+  .earn-walk-amt{color:#52c794;font-weight:900;font-size:1rem;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">🐾 Enzo's</a>
+  <div class="nav-links">
+    <a href="#services">Services</a>
+    <a href="#availability">Calendar</a>
+    <a href="#safety">Safety</a>
+    <a href="#contact">Contact</a>
+    <a href="#booking" class="nav-cta">Book Now</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <span class="hero-emoji">🐕</span>
+  <h1>Enzo's Dog Walking</h1>
+  <p class="hero-sub">📍 Hillsdale · Portland, OR</p>
+  <div class="hero-desc">
+    Reliable dog walking in the Hillsdale area. I'm available every other week and offer safe, simple walks for neighborhood dogs.
+  </div>
+  <a href="#booking" class="btn-primary">🐾 Request a Walk</a>
+  <div class="hero-badges">
+    <span class="badge">🔒 Safe & Trustworthy</span>
+    <span class="badge">📱 Text Updates</span>
+    <span class="badge">💚 Neighborhood Walks</span>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- SERVICES -->
+<section id="services">
+  <h2 class="section-title">🦴 Services & Pricing</h2>
+  <p class="section-sub">Simple, affordable walks — no surprises!</p>
+  <div class="services-grid">
+    <div class="service-card">
+      <span class="service-emoji">⏱️</span>
+      <div class="service-name">20-Minute Walk</div>
+      <div class="service-price">$15</div>
+      <div class="service-note">Quick neighborhood loop</div>
+    </div>
+    <div class="service-card">
+      <span class="service-emoji">🌳</span>
+      <div class="service-name">30-Minute Walk</div>
+      <div class="service-price">$20</div>
+      <div class="service-note">Longer explore walk</div>
+    </div>
+    <div class="service-card service-add">
+      <span class="service-emoji">🐕‍🦺</span>
+      <div class="service-name">2 Dogs</div>
+      <div class="service-price">+$5</div>
+      <div class="service-note">Add a second pup!</div>
+    </div>
+    <div class="service-card">
+      <span class="service-emoji">📅</span>
+      <div class="service-name">Weekends</div>
+      <div class="service-price">Available</div>
+      <div class="service-note">During my scheduled weeks</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- AVAILABILITY -->
+<section id="availability">
+  <h2 class="section-title">📅 My Availability</h2>
+  <p class="section-sub">Every other week — here's May 2025!</p>
+
+  <div class="avail-info">
+    <p>🟢 <strong>Week 1:</strong> Mon May 5 – Sun May 11</p>
+    <p>🟢 <strong>Week 2:</strong> Mon May 19 – Sun May 25</p>
+    <div class="avail-week">
+      <span class="avail-chip chip-green">Mon–Fri: 7 PM – 9 PM</span>
+      <span class="avail-chip chip-blue">Sat–Sun: 12 PM – 7 PM</span>
+    </div>
+    <p style="color:var(--muted);font-size:0.88rem;font-weight:600;">⚠️ Bookings are <strong>request only</strong> — not confirmed until Enzo contacts you back!</p>
+  </div>
+
+  <div class="calendar">
+    <div class="cal-header">🐾 May 2025</div>
+    <div class="cal-grid">
+      <div class="cal-day-name">Sun</div>
+      <div class="cal-day-name">Mon</div>
+      <div class="cal-day-name">Tue</div>
+      <div class="cal-day-name">Wed</div>
+      <div class="cal-day-name">Thu</div>
+      <div class="cal-day-name">Fri</div>
+      <div class="cal-day-name">Sat</div>
+
+      <!-- May 1 = Thursday, so pad Sun/Mon/Tue/Wed -->
+      <div class="cal-day empty"></div>
+      <div class="cal-day empty"></div>
+      <div class="cal-day empty"></div>
+      <div class="cal-day empty"></div>
+      <div class="cal-day off">1</div><!-- Thu -->
+      <div class="cal-day off">2</div><!-- Fri -->
+      <div class="cal-day off">3</div><!-- Sat -->
+
+      <!-- May 4–10: Sun off, Mon-Fri AVAIL weekday, Sat AVAIL weekend -->
+      <div class="cal-day off">4</div><!-- Sun — OFF (week starts Mon 5) -->
+      <div class="cal-day avail-wd">5<span class="cal-time">7–9 PM</span></div><!-- Mon ✅ -->
+      <div class="cal-day avail-wd">6<span class="cal-time">7–9 PM</span></div><!-- Tue ✅ -->
+      <div class="cal-day avail-wd">7<span class="cal-time">7–9 PM</span></div><!-- Wed ✅ -->
+      <div class="cal-day avail-wd">8<span class="cal-time">7–9 PM</span></div><!-- Thu ✅ -->
+      <div class="cal-day avail-wd">9<span class="cal-time">7–9 PM</span></div><!-- Fri ✅ -->
+      <div class="cal-day avail-we">10<span class="cal-time">12–7 PM</span></div><!-- Sat ✅ -->
+
+      <!-- May 11–17: Sun✅ rest OFF -->
+      <div class="cal-day avail-we">11<span class="cal-time">12–7 PM</span></div><!-- Sun ✅ (end of week 1) -->
+      <div class="cal-day off">12</div><!-- Mon OFF -->
+      <div class="cal-day off">13</div>
+      <div class="cal-day off">14</div>
+      <div class="cal-day off">15</div>
+      <div class="cal-day off">16</div>
+      <div class="cal-day off">17</div><!-- Sat OFF -->
+
+      <!-- May 18–24: Sun off, Mon-Fri✅, Sat✅ -->
+      <div class="cal-day off">18</div><!-- Sun — OFF (week 2 starts Mon 19) -->
+      <div class="cal-day avail-wd">19<span class="cal-time">7–9 PM</span></div><!-- Mon ✅ -->
+      <div class="cal-day avail-wd">20<span class="cal-time">7–9 PM</span></div><!-- Tue ✅ -->
+      <div class="cal-day avail-wd">21<span class="cal-time">7–9 PM</span></div><!-- Wed ✅ -->
+      <div class="cal-day avail-wd">22<span class="cal-time">7–9 PM</span></div><!-- Thu ✅ -->
+      <div class="cal-day avail-wd">23<span class="cal-time">7–9 PM</span></div><!-- Fri ✅ -->
+      <div class="cal-day avail-we">24<span class="cal-time">12–7 PM</span></div><!-- Sat ✅ -->
+
+      <!-- May 25–31: Sun✅ rest OFF -->
+      <div class="cal-day avail-we">25<span class="cal-time">12–7 PM</span></div><!-- Sun ✅ (end of week 2) -->
+      <div class="cal-day off">26</div><!-- Mon OFF -->
+      <div class="cal-day off">27</div>
+      <div class="cal-day off">28</div>
+      <div class="cal-day off">29</div>
+      <div class="cal-day off">30</div>
+      <div class="cal-day off">31</div><!-- Sat OFF -->
+    </div>
+    <div class="cal-legend">
+      <span><span class="legend-box" style="background:#e8f7f0;border:2px solid #52c794"></span>Mon–Fri 7–9 PM</span>
+      <span><span class="legend-box" style="background:#eaf4fb;border:2px solid #5dade2"></span>Sat–Sun 12–7 PM</span>
+      <span><span class="legend-box" style="background:#fafafa;border:2px solid #ddd"></span>Not Available</span>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- BOOKING -->
+<section id="booking">
+  <h2 class="section-title">📋 Request a Walk</h2>
+  <p class="section-sub">Fill out the form — Enzo will reach out to confirm!</p>
+
+  <div class="booking-note">
+    <span>⚠️</span>
+    <span>Bookings are <strong>not confirmed</strong> until Enzo contacts you back. Pick a date during an available week!</span>
+  </div>
+
+  <div class="form-card">
+    <form id="bookingForm" onsubmit="submitBooking(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Your Name <span class="req">*</span></label>
+          <input type="text" name="ownerName" required placeholder="Jane Smith">
+        </div>
+        <div class="form-group">
+          <label>Dog's Name <span class="req">*</span></label>
+          <input type="text" name="dogName" required placeholder="Buddy">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>How should Enzo contact you? <span class="req">*</span></label>
+        <div class="cpref-row">
+          <button type="button" class="cpref-btn active" id="prefPhoneBtn" onclick="setContactPref('phone')">📞 Phone / Text</button>
+          <button type="button" class="cpref-btn" id="prefEmailBtn" onclick="setContactPref('email')">✉️ Email</button>
+        </div>
+        <input type="hidden" name="contactPref" id="contactPrefVal" value="phone">
+        <div id="phoneField">
+          <input type="tel" name="phone" id="phoneInput" placeholder="(503) 555-5555">
+        </div>
+        <div id="emailField" style="display:none">
+          <input type="email" name="email" id="emailInput" placeholder="you@email.com">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Dog's Size <span class="req">*</span></label>
+        <select name="dogSize" required>
+          <option value="">Select size...</option>
+          <option>Small (under 20 lbs)</option>
+          <option>Medium (20–50 lbs)</option>
+          <option>Large (50+ lbs)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Dog Behavior / Notes</label>
+        <textarea name="dogNotes" placeholder="Friendly with other dogs? Any quirks? Leash trained?"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Preferred Date <span class="req">*</span></label>
+          <input type="date" name="date" required min="2025-05-05" max="2025-05-25">
+        </div>
+        <div class="form-group">
+          <label>Preferred Time <span class="req">*</span></label>
+          <input type="time" name="time" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Walk Length <span class="req">*</span></label>
+          <select name="walkLength" required>
+            <option value="">Select...</option>
+            <option value="20min">20 minutes – $15</option>
+            <option value="30min">30 minutes – $20</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Number of Dogs</label>
+          <select name="numDogs">
+            <option value="1">1 dog</option>
+            <option value="2">2 dogs (+$5)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Address / Pickup Location <span class="req">*</span></label>
+        <input type="text" name="address" required placeholder="123 SW Hillsdale Hwy, Portland OR">
+      </div>
+
+      <div class="form-group">
+        <label>Preferred Payment Method <span class="req">*</span></label>
+        <div class="payment-options">
+          <label class="pay-opt">
+            <input type="radio" name="paymentMethod" value="Cash" required>
+            <span class="pay-card">💵 Cash</span>
+          </label>
+          <label class="pay-opt">
+            <input type="radio" name="paymentMethod" value="Cash App">
+            <span class="pay-card">📲 Cash App</span>
+          </label>
+          <label class="pay-opt">
+            <input type="radio" name="paymentMethod" value="PayPal">
+            <span class="pay-card">🅿️ PayPal</span>
+          </label>
+          <label class="pay-opt">
+            <input type="radio" name="paymentMethod" value="Venmo">
+            <span class="pay-card">💙 Venmo</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Extra Notes</label>
+        <textarea name="extraNotes" placeholder="Gate code, leash location, special instructions..."></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit">🐾 Send Walk Request!</button>
+    </form>
+    <div class="success-msg" id="successMsg">
+      🎉 Walk request sent! Enzo will reach out soon to confirm. Thanks! 🐕
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- SAFETY -->
+<section id="safety">
+  <h2 class="section-title">🛡️ Safety First</h2>
+  <p class="section-sub">Your pup's safety is my #1 priority.</p>
+  <ul class="safety-list">
+    <li><span class="safety-icon">🦮</span><div>Dogs must be <strong>leash-trained</strong> before booking a walk with me.</div></li>
+    <li><span class="safety-icon">📱</span><div>I bring my phone on <strong>every single walk</strong>, no exceptions.</div></li>
+    <li><span class="safety-icon">💬</span><div>I'll <strong>text you updates</strong> after every walk so you know how it went!</div></li>
+    <li><span class="safety-icon">👨‍👩‍👦</span><div><strong>Parent/guardian</strong> involvement is welcome — they can be the main contact anytime.</div></li>
+    <li><span class="safety-icon">🚫</span><div><strong>No aggressive dogs</strong>, please. Safety for me, your dog, and the neighborhood matters.</div></li>
+  </ul>
+</section>
+
+<hr class="divider">
+
+<!-- CONTACT -->
+<section id="contact">
+  <h2 class="section-title">📬 Get in Touch</h2>
+  <p class="section-sub">Questions? Reach out anytime!</p>
+  <div class="contact-cards">
+    <a href="mailto:Kaczmarek.enzo@gmail.com" class="contact-card">
+      <span class="contact-icon">✉️</span>
+      <div class="contact-label">Email</div>
+      <div class="contact-value">Kaczmarek.enzo@gmail.com</div>
+    </a>
+    <a href="tel:5096373704" class="contact-card">
+      <span class="contact-icon">📞</span>
+      <div class="contact-label">Phone / Text</div>
+      <div class="contact-value">(509) 637-3704</div>
+    </a>
+  </div>
+  <p style="text-align:center;margin-top:16px;font-size:0.88rem;color:var(--muted);font-weight:700;">
+    📍 Serving the Hillsdale neighborhood · Portland, OR
+  </p>
+</section>
+
+<!-- ADMIN SECTION -->
+<div id="admin-section">
+  <div class="inner">
+    <h2 class="section-title">🗂️ Booking Requests</h2>
+    <p class="section-sub" style="margin-bottom:16px;">Admin only — confirm or deny walk requests here!</p>
+
+    <!-- Login box -->
+    <div id="adminLoginBox" class="admin-login-box">
+      <h3>🔐 Admin Login</h3>
+      <p>Enter your password to manage bookings</p>
+      <input type="password" id="adminPassInput" placeholder="Password..." style="width:100%;margin-bottom:10px;" onkeydown="if(event.key==='Enter')adminLogin()">
+      <button class="btn-submit" style="padding:12px;font-size:1rem;" onclick="adminLogin()">Unlock 🔓</button>
+      <div class="earn-err" id="adminErr">Wrong password!</div>
+    </div>
+
+    <!-- Panel (hidden until login) -->
+    <div id="adminPanel" style="display:none">
+      <div class="submissions-list" id="submissionsList">
+        <div class="no-subs">No booking requests yet 🐾</div>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="admin-btn" onclick="openEarnings()">💰 Earnings Dashboard</button>
+        <button class="admin-btn" style="color:#e74c3c;border-color:#e74c3c;" onclick="clearAll()">🗑️ Clear All</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <strong>Enzo's Dog Walking</strong> · Hillsdale, Portland OR<br>
+  <span style="font-size:.8rem;">Made with 🐾 and 💚 · Not a licensed business · For neighborhood use only</span>
+</footer>
+
+<!-- EARNINGS OVERLAY -->
+<div id="earn-overlay">
+  <div class="earn-inner">
+    <!-- Earnings Login -->
+    <div id="earnLoginBox" class="earn-login">
+      <h2>💰 Earnings</h2>
+      <p>Enter your password to view your earnings dashboard</p>
+      <input type="password" id="earnPassInput" placeholder="Password..." onkeydown="if(event.key==='Enter')earnLogin()">
+      <button class="earn-login-btn" onclick="earnLogin()">View Earnings 📊</button>
+      <div class="earn-err" id="earnErr">Wrong password!</div>
+      <br><button onclick="closeEarnings()" style="margin-top:14px;background:transparent;border:none;color:#666;cursor:pointer;font-family:Nunito;font-weight:700;">← Cancel</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="earnDashboard" style="display:none">
+      <div class="earn-header">
+        <span class="earn-title">💰 Earnings</span>
+        <button class="earn-close" onclick="closeEarnings()">✕ Close</button>
+      </div>
+      <div class="earn-stats" id="earnStats"></div>
+      <div class="earn-box">
+        <div class="earn-box-title">📊 Walks Per Day</div>
+        <canvas id="walksChart" style="max-height:200px"></canvas>
+      </div>
+      <div class="earn-box">
+        <div class="earn-box-title">💵 Earnings Per Day ($)</div>
+        <canvas id="earningsChart" style="max-height:200px"></canvas>
+      </div>
+      <div class="earn-box">
+        <div class="earn-box-title">🎯 Payment Methods</div>
+        <canvas id="payChart" style="max-height:200px"></canvas>
+      </div>
+      <div class="earn-box">
+        <div class="earn-box-title">✅ Confirmed Walks</div>
+        <div class="earn-walks-list" id="earnWalksList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const PASS = '@Penzo0425';
+let subs = JSON.parse(localStorage.getItem('enzos_subs') || '[]');
+let charts = {};
+
+// ── EmailJS config ──
+// SETUP STEPS (one-time, takes 3 minutes):
+// 1. Go to https://www.emailjs.com and create a free account
+// 2. Add an Email Service (Gmail) → copy the Service ID below
+// 3. Create an Email Template → copy the Template ID below
+//    In the template body use these variables:
+//    {{owner_name}}, {{dog_name}}, {{contact_pref}}, {{contact}},
+//    {{dog_size}}, {{dog_notes}}, {{date}}, {{time}},
+//    {{walk_length}}, {{num_dogs}}, {{price}}, {{address}},
+//    {{payment_method}}, {{extra_notes}}, {{submitted}}
+// 4. Go to Account → API Keys → copy your Public Key below
+const EMAILJS_PUBLIC_KEY  = 'Wa07tZrqqEm6VQHLK';
+const EMAILJS_SERVICE_ID  = 'service_7fq88ap';
+const EMAILJS_TEMPLATE_ID = 'template_m7m9snj';
+const ENZO_EMAIL = 'Kaczmarek.enzo@gmail.com';
+
+// Initialize EmailJS
+(function() {
+  if (typeof emailjs !== 'undefined') emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+})();
+
+function save() { localStorage.setItem('enzos_subs', JSON.stringify(subs)); }
+
+// ── Contact pref ──
+function setContactPref(pref) {
+  document.getElementById('contactPrefVal').value = pref;
+  document.getElementById('prefPhoneBtn').classList.toggle('active', pref==='phone');
+  document.getElementById('prefEmailBtn').classList.toggle('active', pref==='email');
+  document.getElementById('phoneField').style.display = pref==='phone'?'block':'none';
+  document.getElementById('emailField').style.display = pref==='email'?'block':'none';
+  document.getElementById('phoneInput').required = pref==='phone';
+  document.getElementById('emailInput').required = pref==='email';
+}
+setContactPref('phone');
+
+// ── Price calc ──
+function calcPrice(wl, nd) {
+  return (wl==='30min'?20:15) + (parseInt(nd)>=2?5:0);
+}
+
+// ── Submit booking ──
+async function submitBooking(e) {
+  e.preventDefault();
+  const f = e.target;
+  const pref = f.contactPref.value;
+  const contact = pref==='phone' ? f.phone.value : f.email.value;
+  if (!contact) { alert('Please enter your '+(pref==='phone'?'phone number':'email')+'!'); return; }
+  const wl = f.walkLength.value, nd = f.numDogs.value;
+  const price = calcPrice(wl, nd);
+  const submitted = new Date().toLocaleString();
+  const sub = {
+    id: Date.now(),
+    submitted,
+    status: 'pending',
+    ownerName: f.ownerName.value,
+    dogName: f.dogName.value,
+    contactPref: pref,
+    contact,
+    dogSize: f.dogSize.value,
+    dogNotes: f.dogNotes.value,
+    date: f.date.value,
+    time: f.time.value,
+    walkLength: wl,
+    numDogs: nd,
+    price,
+    address: f.address.value,
+    paymentMethod: f.paymentMethod.value,
+    extraNotes: f.extraNotes.value,
+  };
+  subs.unshift(sub);
+  save();
+  renderSubs();
+
+  // ── Send email via EmailJS ──
+  const emailReady = EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY'
+                  && EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID'
+                  && EMAILJS_TEMPLATE_ID !== 'YOUR_TEMPLATE_ID';
+
+  if (emailReady && typeof emailjs !== 'undefined') {
+    const templateParams = {
+      to_email:       ENZO_EMAIL,
+      owner_name:     sub.ownerName,
+      dog_name:       sub.dogName,
+      contact_pref:   pref === 'phone' ? '📞 Phone/Text' : '✉️ Email',
+      contact:        sub.contact,
+      dog_size:       sub.dogSize,
+      dog_notes:      sub.dogNotes || '—',
+      date:           sub.date,
+      time:           sub.time,
+      walk_length:    wl === '30min' ? '30 minutes ($20)' : '20 minutes ($15)',
+      num_dogs:       sub.numDogs,
+      price:          '$' + sub.price,
+      address:        sub.address,
+      payment_method: sub.paymentMethod,
+      extra_notes:    sub.extraNotes || '—',
+      submitted,
+    };
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+      console.log('📧 Email sent to Enzo!');
+    } catch (err) {
+      console.warn('EmailJS send failed:', err);
+    }
+  } else if (!emailReady) {
+    console.warn('EmailJS not configured yet — booking saved locally only.');
+  }
+
+  f.reset();
+  setContactPref('phone');
+  const msg = document.getElementById('successMsg');
+  msg.style.display = 'block';
+  setTimeout(()=>msg.style.display='none', 6000);
+}
+
+// ── Render submissions ──
+function renderSubs() {
+  const el = document.getElementById('submissionsList');
+  if (!el) return;
+  if (!subs.length) { el.innerHTML='<div class="no-subs">No booking requests yet 🐾</div>'; return; }
+  el.innerHTML = subs.map(s => {
+    const sc = s.status==='confirmed'?'s-confirmed':s.status==='denied'?'s-denied':'s-pending';
+    const st = s.status==='confirmed'?'✅ Confirmed':s.status==='denied'?'❌ Denied':'⏳ Pending';
+    const ci = s.contactPref==='phone'?'📞':'✉️';
+    const wlLabel = s.walkLength==='30min'?'30 min':'20 min';
+    return `<div class="sub-card" id="sc-${s.id}">
+      <div class="sub-header">
+        <span class="sub-name">🐕 ${s.dogName} — ${s.ownerName}</span>
+        <span class="status-badge ${sc}">${st}</span>
+      </div>
+      <div class="sub-grid">
+        <div class="sub-item"><strong>${ci} Contact:</strong> ${s.contact}</div>
+        <div class="sub-item"><strong>Dog Size:</strong> ${s.dogSize}</div>
+        <div class="sub-item"><strong>Date:</strong> ${s.date}</div>
+        <div class="sub-item"><strong>Time:</strong> ${s.time}</div>
+        <div class="sub-item"><strong>Walk:</strong> ${wlLabel}</div>
+        <div class="sub-item"><strong>Dogs:</strong> ${s.numDogs}</div>
+        <div class="sub-item"><strong>💵 Total:</strong> $${s.price}</div>
+        <div class="sub-item"><strong>Payment:</strong> ${s.paymentMethod||'—'}</div>
+        <div class="sub-item" style="grid-column:1/-1"><strong>Address:</strong> ${s.address}</div>
+        ${s.dogNotes?`<div class="sub-item" style="grid-column:1/-1"><strong>Dog Notes:</strong> ${s.dogNotes}</div>`:''}
+        ${s.extraNotes?`<div class="sub-item" style="grid-column:1/-1"><strong>Extra Notes:</strong> ${s.extraNotes}</div>`:''}
+        <div class="sub-item" style="grid-column:1/-1;color:var(--muted);font-size:.77rem;">Submitted: ${s.submitted}</div>
+      </div>
+      <div class="sub-actions">
+        ${s.status!=='confirmed'?`<button class="btn-confirm" onclick="setStatus(${s.id},'confirmed')">✅ Confirm</button>`:''}
+        ${s.status!=='denied'?`<button class="btn-deny" onclick="setStatus(${s.id},'denied')">❌ Deny</button>`:''}
+        <button class="btn-del" onclick="deleteSub(${s.id})">🗑️ Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setStatus(id, status) {
+  const i = subs.findIndex(s=>s.id===id);
+  if (i===-1) return;
+  subs[i].status = status;
+  save(); renderSubs();
+}
+function deleteSub(id) {
+  if (!confirm('Delete this request?')) return;
+  subs = subs.filter(s=>s.id!==id);
+  save(); renderSubs();
+}
+function clearAll() {
+  if (!confirm('Clear ALL requests? Cannot be undone!')) return;
+  subs = []; save(); renderSubs();
+}
+
+// ── Admin login ──
+function adminLogin() {
+  if (document.getElementById('adminPassInput').value === PASS) {
+    document.getElementById('adminLoginBox').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    renderSubs();
+  } else {
+    document.getElementById('adminErr').style.display = 'block';
+  }
+}
+
+// ── Earnings ──
+function openEarnings() {
+  document.getElementById('earn-overlay').classList.add('show');
+  document.getElementById('earnLoginBox').style.display = 'block';
+  document.getElementById('earnDashboard').style.display = 'none';
+  document.getElementById('earnPassInput').value = '';
+  document.getElementById('earnErr').style.display = 'none';
+}
+function closeEarnings() { document.getElementById('earn-overlay').classList.remove('show'); }
+
+function earnLogin() {
+  if (document.getElementById('earnPassInput').value === PASS) {
+    document.getElementById('earnLoginBox').style.display = 'none';
+    document.getElementById('earnDashboard').style.display = 'block';
+    buildEarnings();
+  } else {
+    document.getElementById('earnErr').style.display = 'block';
+  }
+}
+
+function buildEarnings() {
+  const confirmed = subs.filter(s=>s.status==='confirmed');
+  const total = confirmed.reduce((a,s)=>a+(s.price||0),0);
+  const walks = confirmed.length;
+  const avg = walks ? (total/walks).toFixed(2) : '0.00';
+
+  document.getElementById('earnStats').innerHTML = `
+    <div class="earn-stat"><span class="earn-stat-val">$${total}</span><div class="earn-stat-lbl">Total Earned</div></div>
+    <div class="earn-stat"><span class="earn-stat-val">${walks}</span><div class="earn-stat-lbl">Total Walks</div></div>
+    <div class="earn-stat"><span class="earn-stat-val">$${avg}</span><div class="earn-stat-lbl">Avg Per Walk</div></div>
+  `;
+
+  const byDate = {};
+  confirmed.forEach(s=>{ const d=s.date||'?'; if(!byDate[d]) byDate[d]={w:0,e:0}; byDate[d].w++; byDate[d].e+=s.price||0; });
+  const dates = Object.keys(byDate).sort();
+
+  const payMap = {};
+  confirmed.forEach(s=>{ const m=s.paymentMethod||'?'; payMap[m]=(payMap[m]||0)+1; });
+
+  const opt = {
+    responsive:true,
+    plugins:{legend:{labels:{color:'#ccc',font:{family:'Nunito',weight:'700'}}}},
+    scales:{x:{ticks:{color:'#999',font:{family:'Nunito'}},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#999',font:{family:'Nunito'}},grid:{color:'rgba(255,255,255,.08)'},beginAtZero:true}}
+  };
+
+  Object.values(charts).forEach(c=>c.destroy()); charts={};
+
+  charts.w = new Chart(document.getElementById('walksChart'),{
+    type:'bar',
+    data:{labels:dates.length?dates:['No data'],datasets:[{label:'Walks',data:dates.length?dates.map(d=>byDate[d].w):[0],backgroundColor:'rgba(82,199,148,.7)',borderColor:'#52c794',borderWidth:2,borderRadius:8}]},
+    options:opt
+  });
+  charts.e = new Chart(document.getElementById('earningsChart'),{
+    type:'line',
+    data:{labels:dates.length?dates:['No data'],datasets:[{label:'Earnings ($)',data:dates.length?dates.map(d=>byDate[d].e):[0],borderColor:'#52c794',backgroundColor:'rgba(82,199,148,.15)',tension:.4,fill:true,pointBackgroundColor:'#52c794',pointRadius:5}]},
+    options:opt
+  });
+  const pl = Object.keys(payMap);
+  charts.p = new Chart(document.getElementById('payChart'),{
+    type:'doughnut',
+    data:{labels:pl.length?pl:['No data'],datasets:[{data:pl.length?Object.values(payMap):[1],backgroundColor:['#52c794','#5dade2','#f39c12','#e74c3c'],borderWidth:0}]},
+    options:{responsive:true,plugins:{legend:{labels:{color:'#ccc',font:{family:'Nunito',weight:'700'}}}}}
+  });
+
+  const wl = document.getElementById('earnWalksList');
+  wl.innerHTML = confirmed.length
+    ? confirmed.map(s=>`<div class="earn-walk-row"><div class="earn-walk-info"><strong>${s.dogName}</strong> (${s.ownerName}) · ${s.date} ${s.time} · ${s.walkLength==='30min'?'30':'20'} min · ${s.numDogs} dog · ${s.paymentMethod}</div><div class="earn-walk-amt">$${s.price}</div></div>`).join('')
+    : '<div style="color:#555;text-align:center;padding:16px;font-weight:700;">Confirm some walks to see them here!</div>';
+}
+</script>
+</body>
+</html>
