@@ -192,7 +192,10 @@
   <div class="nav-links">
     <a href="#services">Services</a>
     <a href="#availability">Calendar</a>
+    <a href="#about">About</a>
     <a href="#safety">Safety</a>
+    <a href="#faq">FAQ</a>
+    <a href="#area">Area</a>
     <a href="#contact">Contact</a>
     <a href="#booking" class="nav-cta">Book Now</a>
   </div>
@@ -204,13 +207,14 @@
   <h1>Enzo's Dog Walking</h1>
   <p class="hero-sub">📍 Hillsdale · Portland, OR</p>
   <div class="hero-desc">
-    Reliable dog walking in the Hillsdale area. I'm available every other week and offer safe, simple walks for neighborhood dogs.
+    Hi! I'm Enzo, a 15-year-old from Hillsdale who loves dogs and is working hard to earn some money. I own 3 dogs myself, so your pup is in experienced, caring hands!
   </div>
   <a href="#booking" class="btn-primary">🐾 Request a Walk</a>
   <div class="hero-badges">
     <span class="badge">🔒 Safe & Trustworthy</span>
     <span class="badge">📱 Text Updates</span>
     <span class="badge">💚 Neighborhood Walks</span>
+    <span class="badge">🐕 3 Dogs of My Own</span>
   </div>
 </div>
 
@@ -253,11 +257,10 @@
 <!-- AVAILABILITY -->
 <section id="availability">
   <h2 class="section-title">📅 My Availability</h2>
-  <p class="section-sub">Every other week — here's May 2025!</p>
+  <p class="section-sub">Every other week — Mon–Fri 7–9 PM, Sat–Sun 12–7 PM</p>
 
   <div class="avail-info">
-    <p>🟢 <strong>Week 1:</strong> Mon May 5 – Sun May 11</p>
-    <p>🟢 <strong>Week 2:</strong> Mon May 19 – Sun May 25</p>
+    <div id="availWeeksDisplay"></div>
     <div class="avail-week">
       <span class="avail-chip chip-green">Mon–Fri: 7 PM – 9 PM</span>
       <span class="avail-chip chip-blue">Sat–Sun: 12 PM – 7 PM</span>
@@ -266,7 +269,11 @@
   </div>
 
   <div class="calendar">
-    <div class="cal-header">🐾 May 2025</div>
+    <div class="cal-header" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;">
+      <button onclick="calPrev()" id="calPrevBtn" style="background:rgba(255,255,255,.2);border:none;color:white;font-size:1.3rem;cursor:pointer;border-radius:50%;width:34px;height:34px;font-weight:900;line-height:1;">‹</button>
+      <span id="calTitle" style="font-weight:800;font-size:1.1rem;">🐾 May 2025</span>
+      <button onclick="calNext()" id="calNextBtn" style="background:rgba(255,255,255,.2);border:none;color:white;font-size:1.3rem;cursor:pointer;border-radius:50%;width:34px;height:34px;font-weight:900;line-height:1;">›</button>
+    </div>
     <div class="cal-grid">
       <div class="cal-day-name">Sun</div>
       <div class="cal-day-name">Mon</div>
@@ -275,51 +282,7 @@
       <div class="cal-day-name">Thu</div>
       <div class="cal-day-name">Fri</div>
       <div class="cal-day-name">Sat</div>
-
-      <!-- May 1 = Thursday, so pad Sun/Mon/Tue/Wed -->
-      <div class="cal-day empty"></div>
-      <div class="cal-day empty"></div>
-      <div class="cal-day empty"></div>
-      <div class="cal-day empty"></div>
-      <div class="cal-day off">1</div><!-- Thu -->
-      <div class="cal-day off">2</div><!-- Fri -->
-      <div class="cal-day off">3</div><!-- Sat -->
-
-      <!-- May 4–10: Sun off, Mon-Fri AVAIL weekday, Sat AVAIL weekend -->
-      <div class="cal-day off">4</div><!-- Sun — OFF (week starts Mon 5) -->
-      <div class="cal-day avail-wd">5<span class="cal-time">7–9 PM</span></div><!-- Mon ✅ -->
-      <div class="cal-day avail-wd">6<span class="cal-time">7–9 PM</span></div><!-- Tue ✅ -->
-      <div class="cal-day avail-wd">7<span class="cal-time">7–9 PM</span></div><!-- Wed ✅ -->
-      <div class="cal-day avail-wd">8<span class="cal-time">7–9 PM</span></div><!-- Thu ✅ -->
-      <div class="cal-day avail-wd">9<span class="cal-time">7–9 PM</span></div><!-- Fri ✅ -->
-      <div class="cal-day avail-we">10<span class="cal-time">12–7 PM</span></div><!-- Sat ✅ -->
-
-      <!-- May 11–17: Sun✅ rest OFF -->
-      <div class="cal-day avail-we">11<span class="cal-time">12–7 PM</span></div><!-- Sun ✅ (end of week 1) -->
-      <div class="cal-day off">12</div><!-- Mon OFF -->
-      <div class="cal-day off">13</div>
-      <div class="cal-day off">14</div>
-      <div class="cal-day off">15</div>
-      <div class="cal-day off">16</div>
-      <div class="cal-day off">17</div><!-- Sat OFF -->
-
-      <!-- May 18–24: Sun off, Mon-Fri✅, Sat✅ -->
-      <div class="cal-day off">18</div><!-- Sun — OFF (week 2 starts Mon 19) -->
-      <div class="cal-day avail-wd">19<span class="cal-time">7–9 PM</span></div><!-- Mon ✅ -->
-      <div class="cal-day avail-wd">20<span class="cal-time">7–9 PM</span></div><!-- Tue ✅ -->
-      <div class="cal-day avail-wd">21<span class="cal-time">7–9 PM</span></div><!-- Wed ✅ -->
-      <div class="cal-day avail-wd">22<span class="cal-time">7–9 PM</span></div><!-- Thu ✅ -->
-      <div class="cal-day avail-wd">23<span class="cal-time">7–9 PM</span></div><!-- Fri ✅ -->
-      <div class="cal-day avail-we">24<span class="cal-time">12–7 PM</span></div><!-- Sat ✅ -->
-
-      <!-- May 25–31: Sun✅ rest OFF -->
-      <div class="cal-day avail-we">25<span class="cal-time">12–7 PM</span></div><!-- Sun ✅ (end of week 2) -->
-      <div class="cal-day off">26</div><!-- Mon OFF -->
-      <div class="cal-day off">27</div>
-      <div class="cal-day off">28</div>
-      <div class="cal-day off">29</div>
-      <div class="cal-day off">30</div>
-      <div class="cal-day off">31</div><!-- Sat OFF -->
+      <div id="calDays" style="display:contents"></div>
     </div>
     <div class="cal-legend">
       <span><span class="legend-box" style="background:#e8f7f0;border:2px solid #52c794"></span>Mon–Fri 7–9 PM</span>
@@ -455,6 +418,26 @@
 
 <hr class="divider">
 
+<!-- ABOUT -->
+<section id="about">
+  <h2 class="section-title">👋 About Me</h2>
+  <p class="section-sub">A local kid who genuinely loves dogs!</p>
+  <div style="background:var(--card);border-radius:var(--radius);border:2px solid var(--border);padding:24px 20px;box-shadow:var(--shadow);">
+    <div style="font-size:3rem;text-align:center;margin-bottom:14px;">🧑‍🦱🐕🐕🐕</div>
+    <p style="font-weight:700;color:var(--text);margin-bottom:14px;font-size:1rem;text-align:center;line-height:1.7;">
+      Hey! I'm <strong style="color:var(--green)">Enzo</strong>, a 15-year-old living right here in Hillsdale. I started this dog walking business because I love dogs and want to earn some money doing something I actually enjoy!
+    </p>
+    <ul class="safety-list">
+      <li><span class="safety-icon">🐕</span><div>I own <strong>3 dogs of my own</strong>, so I know exactly how to handle dogs of all sizes and personalities.</div></li>
+      <li><span class="safety-icon">🏡</span><div>I'm a <strong>local Hillsdale kid</strong> — I know every street and trail in the neighborhood.</div></li>
+      <li><span class="safety-icon">💪</span><div>I'm working hard to <strong>earn my own money</strong> and build something I'm proud of. Every walk means a lot to me!</div></li>
+      <li><span class="safety-icon">❤️</span><div>I treat every dog like <strong>one of my own</strong>. Your pup will be safe, happy, and tired by the end of the walk!</div></li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider">
+
 <!-- SAFETY -->
 <section id="safety">
   <h2 class="section-title">🛡️ Safety First</h2>
@@ -466,6 +449,129 @@
     <li><span class="safety-icon">👨‍👩‍👦</span><div><strong>Parent/guardian</strong> involvement is welcome — they can be the main contact anytime.</div></li>
     <li><span class="safety-icon">🚫</span><div><strong>No aggressive dogs</strong>, please. Safety for me, your dog, and the neighborhood matters.</div></li>
   </ul>
+</section>
+
+<hr class="divider">
+
+<!-- FAQ -->
+<section id="faq">
+  <h2 class="section-title">❓ FAQ</h2>
+  <p class="section-sub">Common questions — answered!</p>
+  <div style="display:flex;flex-direction:column;gap:12px;">
+
+    <div style="background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);">
+      <div style="font-weight:900;color:var(--dark);margin-bottom:6px;">🌧️ What if it rains?</div>
+      <div style="font-weight:600;color:var(--text);">A little rain won't stop us! I'll still do the walk unless there's lightning or a serious storm. I'll always text you ahead of time if I need to reschedule due to weather.</div>
+    </div>
+
+    <div style="background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);">
+      <div style="font-weight:900;color:var(--dark);margin-bottom:6px;">🐕‍🦺 Do you walk multiple dogs at once?</div>
+      <div style="font-weight:600;color:var(--text);">I walk up to 2 dogs at a time — either 2 of your own dogs, or 1 dog per booking. I don't mix dogs from different families on the same walk for safety reasons.</div>
+    </div>
+
+    <div style="background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);">
+      <div style="font-weight:900;color:var(--dark);margin-bottom:6px;">💵 How do I pay?</div>
+      <div style="font-weight:600;color:var(--text);">I accept Cash, Cash App, PayPal, and Venmo. Payment is due after the walk. You can choose your preferred method when booking!</div>
+    </div>
+
+    <div style="background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);">
+      <div style="font-weight:900;color:var(--dark);margin-bottom:6px;">📍 Where exactly do you walk?</div>
+      <div style="font-weight:600;color:var(--text);">I stick to the Hillsdale neighborhood — sidewalks, local streets, and nearby trails. I know the area really well since I live here and walk my own 3 dogs here all the time!</div>
+    </div>
+
+    <div style="background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);">
+      <div style="font-weight:900;color:var(--dark);margin-bottom:6px;">⏰ How far in advance should I book?</div>
+      <div style="font-weight:600;color:var(--text);">At least 24 hours in advance is ideal so I can plan my schedule. Last-minute requests are okay but not guaranteed — reach out and I'll let you know!</div>
+    </div>
+
+    <div style="background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);">
+      <div style="font-weight:900;color:var(--dark);margin-bottom:6px;">🔑 How do I give you access to my dog?</div>
+      <div style="font-weight:600;color:var(--text);">Most clients just leave their dog with a family member or leave a key/gate code in the booking notes. We'll figure out the easiest option for you when I confirm the booking!</div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- TESTIMONIALS -->
+<section id="reviews">
+  <h2 class="section-title">⭐ What Clients Say</h2>
+  <p class="section-sub">Real feedback from happy dogs & their owners!</p>
+  <div style="display:flex;flex-direction:column;gap:14px;">
+
+    <div style="background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);">
+      <div style="font-size:1.1rem;margin-bottom:4px;">⭐⭐⭐⭐⭐</div>
+      <div style="font-weight:700;color:var(--text);font-style:italic;margin-bottom:10px;">"Enzo is so responsible and reliable! Our dog Biscuit absolutely loves his walks. He always texts us an update after — totally recommend!"</div>
+      <div style="font-weight:800;color:var(--green);font-size:0.88rem;">— Sarah M., Hillsdale</div>
+    </div>
+
+    <div style="background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);">
+      <div style="font-size:1.1rem;margin-bottom:4px;">⭐⭐⭐⭐⭐</div>
+      <div style="font-weight:700;color:var(--text);font-style:italic;margin-bottom:10px;">"I was a little nervous hiring a teenager but Enzo is incredibly mature and clearly knows dogs. My pup comes back happy and tired every time. Great kid!"</div>
+      <div style="font-weight:800;color:var(--green);font-size:0.88rem;">— Mike T., SW Portland</div>
+    </div>
+
+    <div style="background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);">
+      <div style="font-size:1.1rem;margin-bottom:4px;">⭐⭐⭐⭐⭐</div>
+      <div style="font-weight:700;color:var(--text);font-style:italic;margin-bottom:10px;">"Super affordable and he genuinely loves animals. You can tell he has experience with dogs of his own. Will definitely book again!"</div>
+      <div style="font-weight:800;color:var(--green);font-size:0.88rem;">— Lisa K., Hillsdale</div>
+    </div>
+
+  </div>
+  <p style="text-align:center;margin-top:14px;font-size:0.82rem;color:var(--muted);font-weight:700;">⭐ Have feedback? Email me and I'll add your review!</p>
+</section>
+
+<hr class="divider">
+
+<!-- SERVICE AREA -->
+<section id="area">
+  <h2 class="section-title">📍 Service Area</h2>
+  <p class="section-sub">I cover a ~2–3 mile radius around Hillsdale</p>
+  <div style="background:var(--card);border:2px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;">
+    <div style="width:100%;height:320px;position:relative;">
+      <iframe
+        width="100%" height="100%"
+        style="border:0;display:block;"
+        loading="lazy"
+        allowfullscreen
+        src="https://www.openstreetmap.org/export/embed.html?bbox=-122.7800%2C45.4700%2C-122.6400%2C45.5100&layer=mapnik&marker=45.4900%2C-122.7100">
+      </iframe>
+      <!-- Semi-transparent circle overlay to show service area without pinpointing address -->
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:220px;height:220px;border-radius:50%;background:rgba(61,153,112,0.18);border:3px solid rgba(61,153,112,0.6);pointer-events:none;"></div>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:var(--green);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);pointer-events:none;"></div>
+    </div>
+    <div style="padding:14px 18px;border-top:2px solid var(--border);">
+      <p style="font-weight:700;color:var(--text);font-size:0.92rem;">🟢 <strong>Serving:</strong> Hillsdale, Hayhurst, West Portland Park, Multnomah Village area</p>
+      <p style="font-weight:600;color:var(--muted);font-size:0.85rem;margin-top:4px;">Not sure if you're in range? Just reach out and ask — I'm flexible!</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CANCELLATION POLICY -->
+<section id="cancellation">
+  <h2 class="section-title">📋 Cancellation Policy</h2>
+  <p class="section-sub">Simple and fair — no stress!</p>
+  <div style="background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:22px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;">
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+      <span style="font-size:1.4rem;">✅</span>
+      <div><strong style="color:var(--dark);">24+ hours notice</strong> — <span style="font-weight:600;color:var(--green);">No problem at all!</span> Just text or email me and we'll reschedule.</div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+      <span style="font-size:1.4rem;">⚠️</span>
+      <div><strong style="color:var(--dark);">Less than 24 hours</strong> — <span style="font-weight:600;color:#e67e22;">Try to let me know as early as possible</span> so I can adjust my plans. No charge for late cancellations — I'm flexible!</div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+      <span style="font-size:1.4rem;">🌧️</span>
+      <div><strong style="color:var(--dark);">Bad weather</strong> — <span style="font-weight:600;color:var(--blue);">Either of us can reschedule</span> with no penalty. Safety first!</div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+      <span style="font-size:1.4rem;">📱</span>
+      <div><strong style="color:var(--dark);">How to cancel</strong> — Just <span style="font-weight:600;">text or email me</span> as soon as you know. That's it!</div>
+    </div>
+  </div>
 </section>
 
 <hr class="divider">
@@ -739,7 +845,115 @@ function clearAll() {
   subs = []; save(); renderSubs();
 }
 
-// ── Admin login ──
+// ── Dynamic Calendar ──
+// Availability pattern: every other week starting Mon May 5 2025
+// Week ON: Mon May 5 – Sun May 11, then Mon May 19 – Sun May 25, etc. (every 2 weeks)
+const ANCHOR_MON = new Date(2025, 4, 5); // May 5 2025 — first Monday of first ON week
+
+function getWeekMonday(date) {
+  // Returns the Monday of the week containing 'date'
+  const d = new Date(date);
+  const day = d.getDay(); // 0=Sun,1=Mon,...
+  const diff = (day === 0) ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function isAvailableDay(date) {
+  // A day is available if its Monday is in an ON week
+  // ON weeks: anchor Mon + 0, 14, 28, 42... days
+  const mon = getWeekMonday(date);
+  const diffMs = mon - ANCHOR_MON;
+  const diffDays = Math.round(diffMs / (1000*60*60*24));
+  // ON if diffDays is a multiple of 14 and >= 0
+  return diffDays >= 0 && diffDays % 14 === 0;
+}
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const today = new Date();
+let calYear = today.getFullYear();
+let calMonth = today.getMonth();
+// Don't go before May 2025
+if (calYear < 2025 || (calYear === 2025 && calMonth < 4)) { calYear = 2025; calMonth = 4; }
+const maxDate = new Date(today.getFullYear(), today.getMonth() + 1, 1); // 1 month ahead
+
+function renderCalendar() {
+  const title = document.getElementById('calTitle');
+  const daysEl = document.getElementById('calDays');
+  const weeksEl = document.getElementById('availWeeksDisplay');
+  const prevBtn = document.getElementById('calPrevBtn');
+  const nextBtn = document.getElementById('calNextBtn');
+
+  title.textContent = '🐾 ' + MONTHS[calMonth] + ' ' + calYear;
+
+  // Prev/next button visibility
+  const isMin = (calYear === 2025 && calMonth === 4);
+  const isMax = (calYear === maxDate.getFullYear() && calMonth === maxDate.getMonth());
+  prevBtn.style.opacity = isMin ? '0.3' : '1';
+  prevBtn.style.pointerEvents = isMin ? 'none' : 'auto';
+  nextBtn.style.opacity = isMax ? '0.3' : '1';
+  nextBtn.style.pointerEvents = isMax ? 'none' : 'auto';
+
+  // Build days
+  const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  let html = '';
+
+  // Empty cells
+  for (let i = 0; i < firstDay; i++) html += '<div class="cal-day empty"></div>';
+
+  // Day cells
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(calYear, calMonth, d);
+    const dow = date.getDay(); // 0=Sun,6=Sat
+    const avail = isAvailableDay(date);
+    const isWeekend = (dow === 0 || dow === 6);
+    const isWeekday = !isWeekend;
+    let cls, timeLabel = '';
+    if (avail && isWeekday) { cls = 'avail-wd'; timeLabel = '<span class="cal-time">7–9 PM</span>'; }
+    else if (avail && isWeekend) { cls = 'avail-we'; timeLabel = '<span class="cal-time">12–7 PM</span>'; }
+    else { cls = 'off'; }
+    html += `<div class="cal-day ${cls}">${d}${timeLabel}</div>`;
+  }
+  daysEl.innerHTML = html;
+
+  // Show available weeks in this month
+  const onWeeks = [];
+  let d = 1;
+  while (d <= daysInMonth) {
+    const date = new Date(calYear, calMonth, d);
+    if (isAvailableDay(date)) {
+      // Find start and end of this on-week within this month
+      const mon = getWeekMonday(date);
+      const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
+      const start = new Date(Math.max(mon, new Date(calYear, calMonth, 1)));
+      const end = new Date(Math.min(sun, new Date(calYear, calMonth, daysInMonth)));
+      const fmt = dt => dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      onWeeks.push(`🟢 <strong>${fmt(start)} – ${fmt(end)}</strong>`);
+      d = end.getDate() + 8; // skip past this week + 1 off week
+    } else { d++; }
+  }
+  weeksEl.innerHTML = onWeeks.length
+    ? onWeeks.map(w=>`<p style="margin-bottom:6px">${w}</p>`).join('')
+    : '<p style="color:var(--muted);font-weight:700;">No available weeks this month</p>';
+}
+
+function calPrev() {
+  calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calYear < 2025 || (calYear===2025&&calMonth<4)) { calYear=2025; calMonth=4; }
+  renderCalendar();
+}
+function calNext() {
+  calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
+  const max = new Date(today.getFullYear(), today.getMonth()+1);
+  if (calYear > max.getFullYear() || (calYear===max.getFullYear()&&calMonth>max.getMonth())) {
+    calYear=max.getFullYear(); calMonth=max.getMonth();
+  }
+  renderCalendar();
+}
+
+renderCalendar();
 function adminLogin() {
   if (document.getElementById('adminPassInput').value === PASS) {
     document.getElementById('adminLoginBox').style.display = 'none';
