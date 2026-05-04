@@ -751,44 +751,47 @@
   </div>
 </div>
 
-<script>
-// Load EmailJS with fallback for mobile browsers that block CDNs
-(function() {
-  var s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
-  s.onerror = function() {
-    var s2 = document.createElement('script');
-    s2.src = 'https://unpkg.com/@emailjs/browser@4/dist/email.min.js';
-    s2.onload = function() {
-      if (typeof emailjs !== 'undefined') {
-        try { emailjs.init({ publicKey: 'Wa07tZrqqEm6VQHLK' }); } catch(_) {}
-      }
-    };
-    document.head.appendChild(s2);
-  };
-  s.onload = function() {
-    if (typeof emailjs !== 'undefined') {
-      try { emailjs.init({ publicKey: 'Wa07tZrqqEm6VQHLK' }); } catch(_) {}
-    }
-  };
-  document.head.appendChild(s);
-})();
-</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 const PASS = '@Penzo0425';
 let subs = [];
 let charts = {};
+let ejsReady = false;
 
 const EMAILJS_PUBLIC_KEY  = 'Wa07tZrqqEm6VQHLK';
 const EMAILJS_SERVICE_ID  = 'service_7fq88ap';
 const EMAILJS_TEMPLATE_ID = 'template_m7m9snj';
-const ENZO_EMAIL = 'Kaczmarek.enzo@gmail.com';
+const ENZO_EMAIL          = 'Kaczmarek.enzo@gmail.com';
 
 const JSONBIN_BIN_ID  = '69f92747aaba8821976fdd07';
 const JSONBIN_API_KEY = '$2a$10$r9u9/DBwHkbkQ7Hn8JI/WOf4Lp8xUeAKCzr42OfsXFSHlJvuvslZu';
-const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+const JSONBIN_URL     = 'https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID;
 
+// ── Load EmailJS reliably — try two CDNs ──
+function loadEmailJS(cb) {
+  function tryLoad(url, fallbackUrl) {
+    var s = document.createElement('script');
+    s.src = url;
+    s.onload = function() { ejsReady = true; emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); if(cb) cb(); };
+    s.onerror = function() {
+      if (fallbackUrl) {
+        var s2 = document.createElement('script');
+        s2.src = fallbackUrl;
+        s2.onload = function() { ejsReady = true; emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); if(cb) cb(); };
+        s2.onerror = function() { console.warn('EmailJS failed to load from both CDNs'); };
+        document.head.appendChild(s2);
+      }
+    };
+    document.head.appendChild(s);
+  }
+  tryLoad(
+    'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js',
+    'https://unpkg.com/@emailjs/browser@4/dist/email.min.js'
+  );
+}
+loadEmailJS();
+
+// ── Cloud storage ──
 async function cloudLoad() {
   try {
     const res = await fetch(JSONBIN_URL + '/latest', {
@@ -803,7 +806,6 @@ async function cloudLoad() {
     } else {
       subs = [];
     }
-    // Always sync localStorage to match cloud so deletes stick
     localStorage.setItem('enzos_subs', JSON.stringify(subs));
   } catch (err) {
     console.warn('Cloud load failed:', err);
@@ -824,15 +826,172 @@ async function cloudSave() {
   }
 }
 
-function save() { cloudSave(); }
-
-function initEmailJS() {
-  if (typeof emailjs !== 'undefined') {
-    try { emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); } catch(_) {}
-  }
+// ── Contact pref ──
+function setContactPref(pref) {
+  document.getElementById('contactPrefVal').value = pref;
+  document.getElementById('prefPhoneBtn').classList.toggle('active', pref==='phone');
+  document.getElementById('prefEmailBtn').classList.toggle('active', pref==='email');
+  document.getElementById('phoneField').style.display = pref==='phone'?'block':'none';
+  document.getElementById('emailField').style.display = pref==='email'?'block':'none';
+  document.getElementById('phoneInput').required = pref==='phone';
+  document.getElementById('emailInput').required = pref==='email';
 }
-if (document.readyState === 'complete') { initEmailJS(); }
-else { window.addEventListener('load', initEmailJS); }
+setContactPref('phone');
+
+// ── Price calc ──
+function calcPrice(wl, nd) {
+  return (wl==='30min'?20:15) + (parseInt(nd)>=2?5:0);
+}
+
+// ── Submit booking ──
+async function submitBooking(e) {
+  e.preventDefault();
+  const btn = document.querySelector('.btn-submit');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  const f = e.target;
+  const pref = f.contactPref.value;
+  const contact = pref==='phone' ? f.phone.value : f.email.value;
+  if (!contact) {
+    alert('Please enter your '+(pref==='phone'?'phone number':'email')+'!');
+    btn.disabled = false; btn.textContent = '🐾 Send Booking Request';
+    return;
+  }
+  const wl = f.walkLength.value, nd = f.numDogs.value;
+  const price = calcPrice(wl, nd);
+  const submitted = new Date().toLocaleString();
+  const sub = {
+    id: Date.now(),
+    submitted,
+    status: 'pending',
+    ownerName:     f.ownerName.value,
+    dogName:       f.dogName.value,
+    contactPref:   pref,
+    contact,
+    dogSize:       f.dogSize.value,
+    dogNotes:      f.dogNotes.value,
+    date:          f.date.value,
+    time:          f.time.value,
+    walkLength:    wl,
+    numDogs:       nd,
+    price,
+    address:       f.address.value,
+    paymentMethod: f.paymentMethod.value,
+    extraNotes:    f.extraNotes.value,
+  };
+
+  // Load latest from cloud first so we don't overwrite other bookings
+  await cloudLoad();
+  subs.unshift(sub);
+  await cloudSave();
+  renderSubs();
+
+  // Send email — wait up to 5s for EmailJS to be ready
+  const waitForEJS = (ms) => new Promise(resolve => {
+    const start = Date.now();
+    const check = () => {
+      if (ejsReady) return resolve(true);
+      if (Date.now() - start > ms) return resolve(false);
+      setTimeout(check, 100);
+    };
+    check();
+  });
+
+  const ready = await waitForEJS(5000);
+  if (ready) {
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_email:       ENZO_EMAIL,
+        owner_name:     sub.ownerName,
+        dog_name:       sub.dogName,
+        contact_pref:   pref === 'phone' ? 'Phone/Text' : 'Email',
+        contact:        sub.contact,
+        dog_size:       sub.dogSize,
+        dog_notes:      sub.dogNotes || '—',
+        date:           sub.date,
+        time:           sub.time,
+        walk_length:    wl === '30min' ? '30 minutes ($20)' : '20 minutes ($15)',
+        num_dogs:       sub.numDogs,
+        price:          '$' + sub.price,
+        address:        sub.address,
+        payment_method: sub.paymentMethod,
+        extra_notes:    sub.extraNotes || '—',
+        submitted,
+      });
+      console.log('Email sent!');
+    } catch (err) {
+      console.warn('EmailJS send failed:', err);
+    }
+  } else {
+    console.warn('EmailJS not ready after 5s');
+  }
+
+  f.reset();
+  setContactPref('phone');
+  btn.disabled = false;
+  btn.textContent = '🐾 Send Booking Request';
+  const msg = document.getElementById('successMsg');
+  msg.style.display = 'block';
+  setTimeout(()=>msg.style.display='none', 6000);
+}
+
+// ── Render submissions ──
+function renderSubs() {
+  const el = document.getElementById('submissionsList');
+  if (!el) return;
+  if (!subs.length) { el.innerHTML='<div class="no-subs">No booking requests yet 🐾</div>'; return; }
+  el.innerHTML = subs.map(s => {
+    const sc = s.status==='confirmed'?'s-confirmed':s.status==='denied'?'s-denied':'s-pending';
+    const st = s.status==='confirmed'?'✅ Confirmed':s.status==='denied'?'❌ Denied':'⏳ Pending';
+    const ci = s.contactPref==='phone'?'📞':'✉️';
+    const wlLabel = s.walkLength==='30min'?'30 min':'20 min';
+    return `<div class="sub-card" id="sc-${s.id}">
+      <div class="sub-header">
+        <span class="sub-name">🐕 ${s.dogName} — ${s.ownerName}</span>
+        <span class="status-badge ${sc}">${st}</span>
+      </div>
+      <div class="sub-grid">
+        <div class="sub-item"><strong>${ci} Contact:</strong> ${s.contact}</div>
+        <div class="sub-item"><strong>Dog Size:</strong> ${s.dogSize}</div>
+        <div class="sub-item"><strong>Date:</strong> ${s.date}</div>
+        <div class="sub-item"><strong>Time:</strong> ${s.time}</div>
+        <div class="sub-item"><strong>Walk:</strong> ${wlLabel}</div>
+        <div class="sub-item"><strong>Dogs:</strong> ${s.numDogs}</div>
+        <div class="sub-item"><strong>💵 Total:</strong> $${s.price}</div>
+        <div class="sub-item"><strong>Payment:</strong> ${s.paymentMethod||'—'}</div>
+        <div class="sub-item" style="grid-column:1/-1"><strong>Address:</strong> ${s.address}</div>
+        ${s.dogNotes?`<div class="sub-item" style="grid-column:1/-1"><strong>Dog Notes:</strong> ${s.dogNotes}</div>`:''}
+        ${s.extraNotes?`<div class="sub-item" style="grid-column:1/-1"><strong>Extra Notes:</strong> ${s.extraNotes}</div>`:''}
+        <div class="sub-item" style="grid-column:1/-1;color:var(--muted);font-size:.77rem;">Submitted: ${s.submitted}</div>
+      </div>
+      <div class="sub-actions">
+        ${s.status!=='confirmed'?`<button class="btn-confirm" onclick="setStatus(${s.id},'confirmed')">✅ Confirm</button>`:''}
+        ${s.status!=='denied'?`<button class="btn-deny" onclick="setStatus(${s.id},'denied')">❌ Deny</button>`:''}
+        <button class="btn-del" onclick="deleteSub(${s.id})">🗑️ Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function setStatus(id, status) {
+  const i = subs.findIndex(s=>s.id===id);
+  if (i===-1) return;
+  subs[i].status = status;
+  await cloudSave(); renderSubs();
+}
+
+async function deleteSub(id) {
+  if (!confirm('Delete this request?')) return;
+  subs = subs.filter(s=>s.id!==id);
+  await cloudSave(); renderSubs();
+}
+
+async function clearAll() {
+  if (!confirm('Clear ALL requests? Cannot be undone!')) return;
+  subs = []; await cloudSave(); renderSubs();
+}
+function save() { localStorage.setItem('enzos_subs', JSON.stringify(subs)); }
 
 // ── Contact pref ──
 function setContactPref(pref) {
@@ -889,9 +1048,6 @@ async function submitBooking(e) {
                   && EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID'
                   && EMAILJS_TEMPLATE_ID !== 'YOUR_TEMPLATE_ID';
 
-  if (typeof emailjs !== 'undefined') {
-    try { emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); } catch(_) {}
-  }
   if (emailReady && typeof emailjs !== 'undefined') {
     const templateParams = {
       to_email:       ENZO_EMAIL,
@@ -966,20 +1122,20 @@ function renderSubs() {
   }).join('');
 }
 
-async function setStatus(id, status) {
+function setStatus(id, status) {
   const i = subs.findIndex(s=>s.id===id);
   if (i===-1) return;
   subs[i].status = status;
-  await cloudSave(); renderSubs();
+  save(); renderSubs();
 }
-async function deleteSub(id) {
+function deleteSub(id) {
   if (!confirm('Delete this request?')) return;
   subs = subs.filter(s=>s.id!==id);
-  await cloudSave(); renderSubs();
+  save(); renderSubs();
 }
-async function clearAll() {
+function clearAll() {
   if (!confirm('Clear ALL requests? Cannot be undone!')) return;
-  subs = []; await cloudSave(); renderSubs();
+  subs = []; save(); renderSubs();
 }
 
 // ── Dynamic Calendar ──
