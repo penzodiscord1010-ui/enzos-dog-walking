@@ -751,7 +751,29 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+// Load EmailJS with fallback for mobile browsers that block CDNs
+(function() {
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+  s.onerror = function() {
+    var s2 = document.createElement('script');
+    s2.src = 'https://unpkg.com/@emailjs/browser@4/dist/email.min.js';
+    s2.onload = function() {
+      if (typeof emailjs !== 'undefined') {
+        try { emailjs.init({ publicKey: 'Wa07tZrqqEm6VQHLK' }); } catch(_) {}
+      }
+    };
+    document.head.appendChild(s2);
+  };
+  s.onload = function() {
+    if (typeof emailjs !== 'undefined') {
+      try { emailjs.init({ publicKey: 'Wa07tZrqqEm6VQHLK' }); } catch(_) {}
+    }
+  };
+  document.head.appendChild(s);
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 const PASS = '@Penzo0425';
@@ -944,20 +966,20 @@ function renderSubs() {
   }).join('');
 }
 
-function setStatus(id, status) {
+async function setStatus(id, status) {
   const i = subs.findIndex(s=>s.id===id);
   if (i===-1) return;
   subs[i].status = status;
-  save(); renderSubs();
+  await cloudSave(); renderSubs();
 }
-function deleteSub(id) {
+async function deleteSub(id) {
   if (!confirm('Delete this request?')) return;
   subs = subs.filter(s=>s.id!==id);
-  save(); renderSubs();
+  await cloudSave(); renderSubs();
 }
-function clearAll() {
+async function clearAll() {
   if (!confirm('Clear ALL requests? Cannot be undone!')) return;
-  subs = []; save(); renderSubs();
+  subs = []; await cloudSave(); renderSubs();
 }
 
 // ── Dynamic Calendar ──
