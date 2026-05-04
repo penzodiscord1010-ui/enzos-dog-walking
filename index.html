@@ -755,31 +755,53 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 const PASS = '@Penzo0425';
-let subs = JSON.parse(localStorage.getItem('enzos_subs') || '[]');
+let subs = [];
 let charts = {};
 
-// ── EmailJS config ──
-// SETUP STEPS (one-time, takes 3 minutes):
-// 1. Go to https://www.emailjs.com and create a free account
-// 2. Add an Email Service (Gmail) → copy the Service ID below
-// 3. Create an Email Template → copy the Template ID below
-//    In the template body use these variables:
-//    {{owner_name}}, {{dog_name}}, {{contact_pref}}, {{contact}},
-//    {{dog_size}}, {{dog_notes}}, {{date}}, {{time}},
-//    {{walk_length}}, {{num_dogs}}, {{price}}, {{address}},
-//    {{payment_method}}, {{extra_notes}}, {{submitted}}
-// 4. Go to Account → API Keys → copy your Public Key below
 const EMAILJS_PUBLIC_KEY  = 'Wa07tZrqqEm6VQHLK';
 const EMAILJS_SERVICE_ID  = 'service_7fq88ap';
 const EMAILJS_TEMPLATE_ID = 'template_m7m9snj';
 const ENZO_EMAIL = 'Kaczmarek.enzo@gmail.com';
 
-// Initialize EmailJS
-(function() {
-  if (typeof emailjs !== 'undefined') emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-})();
+const JSONBIN_BIN_ID  = '69f92747aaba8821976fdd07';
+const JSONBIN_API_KEY = '$2a$10$r9u9/DBwHkbkQ7Hn8JI/WOf4Lp8xUeAKCzr42OfsXFSHlJvuvslZu';
+const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
-function save() { localStorage.setItem('enzos_subs', JSON.stringify(subs)); }
+async function cloudLoad() {
+  try {
+    const res = await fetch(JSONBIN_URL + '/latest', {
+      headers: { 'X-Master-Key': JSONBIN_API_KEY }
+    });
+    const data = await res.json();
+    subs = Array.isArray(data.record) ? data.record : [];
+  } catch (err) {
+    console.warn('Cloud load failed:', err);
+    subs = JSON.parse(localStorage.getItem('enzos_subs') || '[]');
+  }
+}
+
+async function cloudSave() {
+  localStorage.setItem('enzos_subs', JSON.stringify(subs));
+  try {
+    await fetch(JSONBIN_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
+      body: JSON.stringify(subs)
+    });
+  } catch (err) {
+    console.warn('Cloud save failed:', err);
+  }
+}
+
+function save() { cloudSave(); }
+
+function initEmailJS() {
+  if (typeof emailjs !== 'undefined') {
+    try { emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); } catch(_) {}
+  }
+}
+if (document.readyState === 'complete') { initEmailJS(); }
+else { window.addEventListener('load', initEmailJS); }
 
 // ── Contact pref ──
 function setContactPref(pref) {
@@ -836,6 +858,9 @@ async function submitBooking(e) {
                   && EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID'
                   && EMAILJS_TEMPLATE_ID !== 'YOUR_TEMPLATE_ID';
 
+  if (typeof emailjs !== 'undefined') {
+    try { emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); } catch(_) {}
+  }
   if (emailReady && typeof emailjs !== 'undefined') {
     const templateParams = {
       to_email:       ENZO_EMAIL,
@@ -1053,10 +1078,12 @@ document.addEventListener('click', e => {
   if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) closeMenu();
 });
 
-function adminLogin() {
+async function adminLogin() {
   if (document.getElementById('adminPassInput').value === PASS) {
     document.getElementById('adminLoginBox').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
+    document.getElementById('submissionsList').innerHTML = '<div class="no-subs">Loading bookings... 🐾</div>';
+    await cloudLoad();
     renderSubs();
   } else {
     document.getElementById('adminErr').style.display = 'block';
