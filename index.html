@@ -386,7 +386,7 @@
   </div>
 
   <div class="form-card">
-    <form id="bookingForm" onsubmit="handleSubmit(event)">
+    <form id="bookingForm">
       <div class="form-row">
         <div class="form-group">
           <label>Your Name <span class="req">*</span></label>
@@ -489,7 +489,7 @@
         <textarea name="extraNotes" placeholder="Gate code, leash location, special instructions..."></textarea>
       </div>
 
-      <button type="submit" class="btn-submit" id="submitBtn">🐾 Send Walk Request!</button>
+      <button type="button" class="btn-submit" id="submitBtn" onclick="handleSubmit()">🐾 Send Walk Request!</button>
     </form>
     <div class="success-msg" id="successMsg">
       🎉 Walk request sent! Enzo will reach out soon to confirm. Thanks! 🐕
@@ -754,8 +754,37 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 const PASS = '@Penzo0425';
-let subs = JSON.parse(localStorage.getItem('enzos_subs') || '[]');
+const STORAGE_KEY = 'enzos_subs_v2';
+let subs = [];
 let charts = {};
+
+// ── Shared cloud storage helpers ──
+// Uses window.storage (artifact persistent shared storage) so all devices see the same bookings.
+// Falls back to localStorage if window.storage is not available (e.g. self-hosted).
+async function loadSubs() {
+  try {
+    if (window.storage) {
+      const result = await window.storage.get(STORAGE_KEY, true);
+      subs = result ? JSON.parse(result.value) : [];
+    } else {
+      subs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    }
+  } catch(e) {
+    subs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  }
+}
+
+async function saveSubs() {
+  try {
+    if (window.storage) {
+      await window.storage.set(STORAGE_KEY, JSON.stringify(subs), true);
+    } else {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(subs));
+    }
+  } catch(e) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(subs));
+  }
+}
 
 // ── Contact pref ──
 function setContactPref(pref) {
@@ -773,76 +802,99 @@ function calcPrice(wl, nd) {
   return (wl==='30min'?20:15) + (parseInt(nd)>=2?5:0);
 }
 
-async function handleSubmit(e) {
-  e.preventDefault();
-  const btn = document.getElementById('submitBtn');
-  const f = e.target;
-  const pref = f.contactPref.value;
-  const contact = pref==='phone' ? f.phone.value : f.email.value;
-  if (!contact) { alert('Please enter your ' + (pref==='phone' ? 'phone number' : 'email') + '!'); return; }
+function handleSubmit() {
+  var f = document.getElementById('bookingForm');
+  var btn = document.getElementById('submitBtn');
+
+  // Manual validation for required fields
+  var ownerName = f.querySelector('[name=ownerName]').value.trim();
+  var dogName = f.querySelector('[name=dogName]').value.trim();
+  var dogSize = f.querySelector('[name=dogSize]').value;
+  var date = f.querySelector('[name=date]').value;
+  var time = f.querySelector('[name=time]').value;
+  var walkLength = f.querySelector('[name=walkLength]').value;
+  var address = f.querySelector('[name=address]').value.trim();
+  var pref = f.querySelector('[name=contactPref]').value;
+  var contact = pref === 'phone' ? f.querySelector('[name=phone]').value.trim() : f.querySelector('[name=email]').value.trim();
+  var paymentMethod = '';
+  var payRadios = f.querySelectorAll('[name=paymentMethod]');
+  for (var r = 0; r < payRadios.length; r++) { if (payRadios[r].checked) { paymentMethod = payRadios[r].value; break; } }
+  var numDogs = f.querySelector('[name=numDogs]').value;
+  var dogNotes = f.querySelector('[name=dogNotes]').value.trim();
+  var extraNotes = f.querySelector('[name=extraNotes]').value.trim();
+
+  if (!ownerName) { alert('Please enter your name!'); return; }
+  if (!dogName) { alert("Please enter your dog's name!"); return; }
+  if (!contact) { alert('Please enter your ' + (pref === 'phone' ? 'phone number' : 'email address') + '!'); return; }
+  if (!dogSize) { alert("Please select your dog's size!"); return; }
+  if (!date) { alert('Please select a preferred date!'); return; }
+  if (!time) { alert('Please select a preferred time!'); return; }
+  if (!walkLength) { alert('Please select a walk length!'); return; }
+  if (!address) { alert('Please enter your address!'); return; }
+  if (!paymentMethod) { alert('Please select a payment method!'); return; }
 
   btn.disabled = true;
   btn.textContent = '⏳ Sending...';
 
-  const wl = f.walkLength.value, nd = f.numDogs.value;
-  const price = calcPrice(wl, nd);
-  const submitted = new Date().toLocaleString();
+  var price = calcPrice(walkLength, numDogs);
+  var submitted = new Date().toLocaleString();
 
-  const data = {
-    'Owner Name': f.ownerName.value,
-    'Dog Name': f.dogName.value,
+  var sub = {
+    id: Date.now(), submitted: submitted, status: 'pending',
+    ownerName: ownerName, dogName: dogName,
+    contactPref: pref, contact: contact, dogSize: dogSize,
+    dogNotes: dogNotes, date: date, time: time,
+    walkLength: walkLength, numDogs: numDogs, price: price,
+    address: address, paymentMethod: paymentMethod, extraNotes: extraNotes,
+  };
+
+  // Save to localStorage immediately (works on any hosting)
+  try {
+    var existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    existing.unshift(sub);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+    subs = existing;
+  } catch(e) {}
+
+  // Also try saving to shared cloud storage (for cross-device admin panel)
+  saveSubs().catch(function(){});
+
+  // Send email notification via Formspree
+  var emailData = {
+    'Owner Name': ownerName,
+    'Dog Name': dogName,
     'Contact Pref': pref === 'phone' ? 'Phone/Text' : 'Email',
     'Contact': contact,
-    'Dog Size': f.dogSize.value,
-    'Dog Notes': f.dogNotes.value || '—',
-    'Date': f.date.value,
-    'Time': f.time.value,
-    'Walk Length': wl === '30min' ? '30 min ($20)' : '20 min ($15)',
-    'Num Dogs': nd,
+    'Dog Size': dogSize,
+    'Dog Notes': dogNotes || '—',
+    'Date': date,
+    'Time': time,
+    'Walk Length': walkLength === '30min' ? '30 min ($20)' : '20 min ($15)',
+    'Num Dogs': numDogs,
     'Total Price': '$' + price,
-    'Address': f.address.value,
-    'Payment Method': f.paymentMethod.value,
-    'Extra Notes': f.extraNotes.value || '—',
+    'Address': address,
+    'Payment Method': paymentMethod,
+    'Extra Notes': extraNotes || '—',
     'Submitted': submitted,
   };
 
-  try {
-    const res = await fetch('https://formspree.io/f/xpqbdqgd', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    const result = await res.json();
-    if (res.ok) {
-      const sub = {
-        id: Date.now(), submitted, status: 'pending',
-        ownerName: f.ownerName.value, dogName: f.dogName.value,
-        contactPref: pref, contact, dogSize: f.dogSize.value,
-        dogNotes: f.dogNotes.value, date: f.date.value, time: f.time.value,
-        walkLength: wl, numDogs: nd, price, address: f.address.value,
-        paymentMethod: f.paymentMethod.value, extraNotes: f.extraNotes.value,
-      };
-      subs.unshift(sub);
-      localStorage.setItem('enzos_subs', JSON.stringify(subs));
-      renderSubs();
-      f.reset();
-      setContactPref('phone');
-      const msg = document.getElementById('successMsg');
-      msg.style.display = 'block';
-      setTimeout(() => msg.style.display = 'none', 6000);
-    } else {
-      alert('Something went wrong: ' + (result.error || 'please try again'));
-    }
-  } catch(err) {
-    alert('Could not send. Check your internet and try again!');
-  }
+  fetch('https://formspree.io/f/xpqbdqgd', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(emailData),
+  }).catch(function(err) {
+    console.warn('Email notification failed:', err);
+  });
+
+  // Reset form and show success — don't wait for email
+  f.reset();
+  setContactPref('phone');
+  var msg = document.getElementById('successMsg');
+  msg.style.display = 'block';
+  setTimeout(function() { msg.style.display = 'none'; }, 7000);
 
   btn.disabled = false;
   btn.textContent = '🐾 Send Walk Request!';
-}
-
-function save() {
-  localStorage.setItem('enzos_subs', JSON.stringify(subs));
 }
 
 function renderSubs() {
@@ -882,22 +934,22 @@ function renderSubs() {
   }).join('');
 }
 
-function setStatus(id, status) {
+async function setStatus(id, status) {
   const i = subs.findIndex(s=>s.id===id);
   if (i===-1) return;
   subs[i].status = status;
-  save(); renderSubs();
+  await saveSubs(); renderSubs();
 }
 
-function deleteSub(id) {
+async function deleteSub(id) {
   if (!confirm('Delete this request?')) return;
   subs = subs.filter(s=>s.id!==id);
-  save(); renderSubs();
+  await saveSubs(); renderSubs();
 }
 
-function clearAll() {
+async function clearAll() {
   if (!confirm('Clear ALL requests? Cannot be undone!')) return;
-  subs = []; save(); renderSubs();
+  subs = []; await saveSubs(); renderSubs();
 }
 
 // // ── Dynamic Calendar ──
@@ -1027,11 +1079,12 @@ document.addEventListener('click', e => {
   if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) closeMenu();
 });
 
-function adminLogin() {
+async function adminLogin() {
   if (document.getElementById('adminPassInput').value === PASS) {
     document.getElementById('adminLoginBox').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
-    subs = JSON.parse(localStorage.getItem('enzos_subs') || '[]');
+    document.getElementById('submissionsList').innerHTML = '<div class="no-subs">Loading bookings... 🐾</div>';
+    await loadSubs();
     renderSubs();
   } else {
     document.getElementById('adminErr').style.display = 'block';
@@ -1048,10 +1101,11 @@ function openEarnings() {
 }
 function closeEarnings() { document.getElementById('earn-overlay').classList.remove('show'); }
 
-function earnLogin() {
+async function earnLogin() {
   if (document.getElementById('earnPassInput').value === PASS) {
     document.getElementById('earnLoginBox').style.display = 'none';
     document.getElementById('earnDashboard').style.display = 'block';
+    await loadSubs();
     buildEarnings();
   } else {
     document.getElementById('earnErr').style.display = 'block';
