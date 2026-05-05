@@ -752,38 +752,101 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
 const PASS = '@Penzo0425';
-const STORAGE_KEY = 'enzos_subs_v2';
 let subs = [];
 let charts = {};
 
-// ── Shared cloud storage helpers ──
-// Uses window.storage (artifact persistent shared storage) so all devices see the same bookings.
-// Falls back to localStorage if window.storage is not available (e.g. self-hosted).
-async function loadSubs() {
-  try {
-    if (window.storage) {
-      const result = await window.storage.get(STORAGE_KEY, true);
-      subs = result ? JSON.parse(result.value) : [];
-    } else {
-      subs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    }
-  } catch(e) {
-    subs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  }
+// ── Firebase Setup ──
+// INSTRUCTIONS: Replace the values below with your own Firebase project config.
+// 1. Go to https://console.firebase.google.com
+// 2. Click "Add project" → name it "enzos-dog-walking" → create it
+// 3. Click the </> Web icon to register a web app → copy the firebaseConfig values here
+// 4. In the left menu go to Build → Realtime Database → Create database → Start in test mode
+const firebaseConfig = {
+  apiKey: "AIzaSyBxLmIHAywwsa3ki4tyAuejFGj0cVXeuSY",
+  authDomain: "dog-walking-ff7ea.firebaseapp.com",
+  databaseURL: "https://dog-walking-ff7ea-default-rtdb.firebaseio.com",
+  projectId: "dog-walking-ff7ea",
+  storageBucket: "dog-walking-ff7ea.firebasestorage.app",
+  messagingSenderId: "449725511498",
+  appId: "1:449725511498:web:afdda060808e19acfdf3b3"
+};
+
+let db = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+} catch(e) {
+  console.warn('Firebase not configured yet, falling back to localStorage');
 }
 
-async function saveSubs() {
-  try {
-    if (window.storage) {
-      await window.storage.set(STORAGE_KEY, JSON.stringify(subs), true);
-    } else {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(subs));
-    }
-  } catch(e) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(subs));
+async function loadSubs() {
+  if (db && firebaseConfig.apiKey !== 'PASTE_YOUR_API_KEY_HERE') {
+    try {
+      const snap = await db.ref('bookings').once('value');
+      const val = snap.val();
+      if (val) {
+        // Firebase stores as object keyed by push ID — convert to array sorted newest first
+        subs = Object.values(val).sort(function(a, b) { return b.id - a.id; });
+      } else {
+        subs = [];
+      }
+      return;
+    } catch(e) { console.warn('Firebase load failed:', e); }
   }
+  subs = JSON.parse(localStorage.getItem('enzos_subs_v2') || '[]');
+}
+
+async function saveSub(sub) {
+  if (db && firebaseConfig.apiKey !== 'PASTE_YOUR_API_KEY_HERE') {
+    try {
+      await db.ref('bookings/' + sub.id).set(sub);
+      return;
+    } catch(e) { console.warn('Firebase save failed:', e); }
+  }
+  var existing = JSON.parse(localStorage.getItem('enzos_subs_v2') || '[]');
+  existing = existing.filter(function(s) { return s.id !== sub.id; });
+  existing.unshift(sub);
+  localStorage.setItem('enzos_subs_v2', JSON.stringify(existing));
+}
+
+async function updateSub(sub) {
+  if (db && firebaseConfig.apiKey !== 'PASTE_YOUR_API_KEY_HERE') {
+    try {
+      await db.ref('bookings/' + sub.id).update(sub);
+      return;
+    } catch(e) { console.warn('Firebase update failed:', e); }
+  }
+  var existing = JSON.parse(localStorage.getItem('enzos_subs_v2') || '[]');
+  var idx = existing.findIndex(function(s) { return s.id === sub.id; });
+  if (idx !== -1) existing[idx] = sub;
+  localStorage.setItem('enzos_subs_v2', JSON.stringify(existing));
+}
+
+async function deleteSub_db(id) {
+  if (db && firebaseConfig.apiKey !== 'PASTE_YOUR_API_KEY_HERE') {
+    try {
+      await db.ref('bookings/' + id).remove();
+      return;
+    } catch(e) { console.warn('Firebase delete failed:', e); }
+  }
+  var existing = JSON.parse(localStorage.getItem('enzos_subs_v2') || '[]');
+  existing = existing.filter(function(s) { return s.id !== id; });
+  localStorage.setItem('enzos_subs_v2', JSON.stringify(existing));
+}
+
+async function clearAll_db() {
+  if (db && firebaseConfig.apiKey !== 'PASTE_YOUR_API_KEY_HERE') {
+    try {
+      await db.ref('bookings').remove();
+      return;
+    } catch(e) { console.warn('Firebase clear failed:', e); }
+  }
+  localStorage.removeItem('enzos_subs_v2');
 }
 
 // ── Contact pref ──
@@ -848,16 +911,9 @@ function handleSubmit() {
     address: address, paymentMethod: paymentMethod, extraNotes: extraNotes,
   };
 
-  // Save to localStorage immediately (works on any hosting)
-  try {
-    var existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    existing.unshift(sub);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
-    subs = existing;
-  } catch(e) {}
-
-  // Also try saving to shared cloud storage (for cross-device admin panel)
-  saveSubs().catch(function(){});
+  // Save to Firebase (or localStorage fallback)
+  saveSub(sub).catch(function(){});
+  subs.unshift(sub);
 
   // Send email notification via Formspree
   var emailData = {
@@ -938,18 +994,22 @@ async function setStatus(id, status) {
   const i = subs.findIndex(s=>s.id===id);
   if (i===-1) return;
   subs[i].status = status;
-  await saveSubs(); renderSubs();
+  await updateSub(subs[i]);
+  renderSubs();
 }
 
 async function deleteSub(id) {
   if (!confirm('Delete this request?')) return;
   subs = subs.filter(s=>s.id!==id);
-  await saveSubs(); renderSubs();
+  await deleteSub_db(id);
+  renderSubs();
 }
 
 async function clearAll() {
   if (!confirm('Clear ALL requests? Cannot be undone!')) return;
-  subs = []; await saveSubs(); renderSubs();
+  subs = [];
+  await clearAll_db();
+  renderSubs();
 }
 
 // // ── Dynamic Calendar ──
