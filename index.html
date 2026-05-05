@@ -155,6 +155,30 @@
   footer{background:var(--dark);color:#aaa;text-align:center;padding:24px 20px;font-size:0.85rem;font-weight:600;}
   footer strong{color:var(--green-light);}
   .divider{height:3px;background:linear-gradient(90deg,var(--green-light),var(--blue-light));border:none;margin:0;opacity:.3;}
+  .view-counter{display:inline-flex;align-items:center;gap:7px;background:rgba(82,199,148,.12);border:1.5px solid rgba(82,199,148,.3);border-radius:50px;padding:5px 16px;margin-top:10px;font-size:0.82rem;font-weight:700;color:#52c794;}
+  .view-counter span{color:#aaa;}
+
+  /* ADMIN TABS */
+  .admin-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+  .admin-tab{background:white;border:2px solid var(--border);border-radius:50px;padding:8px 18px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;color:var(--muted);cursor:pointer;transition:all .2s;}
+  .admin-tab.active{background:var(--green);border-color:var(--green);color:white;}
+  .admin-tab-panel{display:none;}
+  .admin-tab-panel.active{display:block;}
+
+  /* VIEWS DASHBOARD */
+  .views-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
+  @media(max-width:480px){.views-stats{grid-template-columns:1fr 1fr;}}
+  .views-stat{background:white;border:2px solid var(--border);border-radius:16px;padding:16px;text-align:center;box-shadow:var(--shadow);}
+  .views-stat-val{font-size:1.7rem;font-weight:900;color:var(--green);display:block;}
+  .views-stat-lbl{font-size:0.78rem;font-weight:700;color:var(--muted);margin-top:2px;}
+  .views-chart-box{background:white;border:2px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow);margin-bottom:16px;}
+  .views-chart-title{font-weight:800;color:var(--dark);margin-bottom:14px;font-size:0.95rem;}
+  .views-log{background:white;border:2px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow);}
+  .views-log-title{font-weight:800;color:var(--dark);margin-bottom:12px;font-size:0.95rem;}
+  .views-log-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.88rem;font-weight:700;}
+  .views-log-row:last-child{border-bottom:none;}
+  .views-log-date{color:var(--text);}
+  .views-log-count{color:var(--green);font-weight:900;}
 
   /* EARNINGS OVERLAY */
   #earn-overlay{display:none;position:fixed;inset:0;background:rgba(20,35,28,.97);z-index:9999;overflow-y:auto;padding:28px 20px;}
@@ -288,7 +312,7 @@
   <h1>Enzo's Dog Walking</h1>
   <p class="hero-sub">📍 Hillsdale · Portland, OR</p>
   <div class="hero-desc">
-    Hi! I'm Enzo, a 15-year-old from Hillsdale who loves dogs and is working hard to earn some money. I own 3 dogs myself, so your pup is in experienced, caring hands!
+    Hi! I'm Enzo, a high schooler from Hillsdale who loves dogs and is working hard to earn some money. I own 3 dogs myself, so your pup is in experienced, caring hands!
   </div>
   <a href="#booking" class="btn-primary">🐾 Request a Walk</a>
   <div class="hero-badges">
@@ -506,7 +530,7 @@
   <div style="background:var(--card);border-radius:var(--radius);border:2px solid var(--border);padding:24px 20px;box-shadow:var(--shadow);">
     <div style="font-size:3rem;text-align:center;margin-bottom:14px;">🧑‍🦱🐕🐕🐕</div>
     <p style="font-weight:700;color:var(--text);margin-bottom:14px;font-size:1rem;text-align:center;line-height:1.7;">
-      Hey! I'm <strong style="color:var(--green)">Enzo</strong>, a 15-year-old living right here in Hillsdale. I started this dog walking business because I love dogs and want to earn some money doing something I actually enjoy!
+      Hey! I'm <strong style="color:var(--green)">Enzo</strong>, a high school student living right here in Hillsdale. I started this dog walking business because I love dogs and want to earn some money doing something I actually enjoy!
     </p>
     <ul class="safety-list">
       <li><span class="safety-icon">🐕</span><div>I own <strong>3 dogs of my own</strong>, so I know exactly how to handle dogs of all sizes and personalities.</div></li>
@@ -681,8 +705,8 @@
 <!-- ADMIN SECTION -->
 <div id="admin-section">
   <div class="inner">
-    <h2 class="section-title">🗂️ Booking Requests</h2>
-    <p class="section-sub" style="margin-bottom:16px;">Admin only — confirm or deny walk requests here!</p>
+    <h2 class="section-title">🗂️ Admin Dashboard</h2>
+    <p class="section-sub" style="margin-bottom:16px;">Admin only — manage your business here!</p>
 
     <!-- Login box -->
     <div id="adminLoginBox" class="admin-login-box">
@@ -695,12 +719,59 @@
 
     <!-- Panel (hidden until login) -->
     <div id="adminPanel" style="display:none">
-      <div class="submissions-list" id="submissionsList">
-        <div class="no-subs">No booking requests yet 🐾</div>
+      <!-- Tabs -->
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchAdminTab('bookings', this)">📋 Bookings</button>
+        <button class="admin-tab" onclick="switchAdminTab('views', this)">👀 Website Views</button>
+        <button class="admin-tab" onclick="switchAdminTab('earnings', this)">💰 Earnings</button>
       </div>
-      <div style="margin-top:16px;">
-        <button class="admin-btn" onclick="openEarnings()">💰 Earnings Dashboard</button>
-        <button class="admin-btn" style="color:#e74c3c;border-color:#e74c3c;" onclick="clearAll()">🗑️ Clear All</button>
+
+      <!-- Bookings Tab -->
+      <div id="adminTab-bookings" class="admin-tab-panel active">
+        <div class="submissions-list" id="submissionsList">
+          <div class="no-subs">No booking requests yet 🐾</div>
+        </div>
+        <div style="margin-top:16px;">
+          <button class="admin-btn" style="color:#e74c3c;border-color:#e74c3c;" onclick="clearAll()">🗑️ Clear All</button>
+        </div>
+      </div>
+
+      <!-- Views Tab -->
+      <div id="adminTab-views" class="admin-tab-panel">
+        <div class="views-stats">
+          <div class="views-stat"><span class="views-stat-val" id="vTotal">—</span><div class="views-stat-lbl">Total Views</div></div>
+          <div class="views-stat"><span class="views-stat-val" id="vToday">—</span><div class="views-stat-lbl">Today</div></div>
+          <div class="views-stat"><span class="views-stat-val" id="vAvg">—</span><div class="views-stat-lbl">Avg / Day</div></div>
+        </div>
+        <div class="views-chart-box">
+          <div class="views-chart-title">📈 Daily Views — Last 14 Days</div>
+          <canvas id="viewsChart" style="max-height:220px"></canvas>
+        </div>
+        <div class="views-log">
+          <div class="views-log-title">📅 Views by Day</div>
+          <div id="viewsLogList"><div class="no-subs">Loading...</div></div>
+        </div>
+      </div>
+
+      <!-- Earnings Tab -->
+      <div id="adminTab-earnings" class="admin-tab-panel">
+        <div class="earn-stats" id="earnStats2" style="margin-bottom:22px;"></div>
+        <div class="views-chart-box">
+          <div class="views-chart-title">📊 Walks Per Day</div>
+          <canvas id="walksChart2" style="max-height:200px"></canvas>
+        </div>
+        <div class="views-chart-box">
+          <div class="views-chart-title">💵 Earnings Per Day ($)</div>
+          <canvas id="earningsChart2" style="max-height:200px"></canvas>
+        </div>
+        <div class="views-chart-box">
+          <div class="views-chart-title">🎯 Payment Methods</div>
+          <canvas id="payChart2" style="max-height:200px"></canvas>
+        </div>
+        <div class="views-log">
+          <div class="views-log-title">✅ Confirmed Walks</div>
+          <div class="earn-walks-list" id="earnWalksList2"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -708,48 +779,10 @@
 
 <footer>
   <strong>Enzo's Dog Walking</strong> · Hillsdale, Portland OR<br>
-  <span style="font-size:.8rem;">Made with 🐾 and 💚 · Not a licensed business · For neighborhood use only</span>
+  <span style="font-size:.8rem;">Made with 🐾 and 💚 · Not a licensed business · For neighborhood use only</span><br>
+  <div class="view-counter">👀 <span>Views:</span> <strong id="viewCount">...</strong></div>
 </footer>
 
-<!-- EARNINGS OVERLAY -->
-<div id="earn-overlay">
-  <div class="earn-inner">
-    <!-- Earnings Login -->
-    <div id="earnLoginBox" class="earn-login">
-      <h2>💰 Earnings</h2>
-      <p>Enter your password to view your earnings dashboard</p>
-      <input type="password" id="earnPassInput" placeholder="Password..." onkeydown="if(event.key==='Enter')earnLogin()">
-      <button class="earn-login-btn" onclick="earnLogin()">View Earnings 📊</button>
-      <div class="earn-err" id="earnErr">Wrong password!</div>
-      <br><button onclick="closeEarnings()" style="margin-top:14px;background:transparent;border:none;color:#666;cursor:pointer;font-family:Nunito;font-weight:700;">← Cancel</button>
-    </div>
-
-    <!-- Dashboard -->
-    <div id="earnDashboard" style="display:none">
-      <div class="earn-header">
-        <span class="earn-title">💰 Earnings</span>
-        <button class="earn-close" onclick="closeEarnings()">✕ Close</button>
-      </div>
-      <div class="earn-stats" id="earnStats"></div>
-      <div class="earn-box">
-        <div class="earn-box-title">📊 Walks Per Day</div>
-        <canvas id="walksChart" style="max-height:200px"></canvas>
-      </div>
-      <div class="earn-box">
-        <div class="earn-box-title">💵 Earnings Per Day ($)</div>
-        <canvas id="earningsChart" style="max-height:200px"></canvas>
-      </div>
-      <div class="earn-box">
-        <div class="earn-box-title">🎯 Payment Methods</div>
-        <canvas id="payChart" style="max-height:200px"></canvas>
-      </div>
-      <div class="earn-box">
-        <div class="earn-box-title">✅ Confirmed Walks</div>
-        <div class="earn-walks-list" id="earnWalksList"></div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <!-- Firebase -->
@@ -783,6 +816,23 @@ try {
 } catch(e) {
   console.warn('Firebase not configured yet, falling back to localStorage');
 }
+
+// ── View Counter ──
+(async function trackViews() {
+  const el = document.getElementById('viewCount');
+  if (!db) { if (el) el.textContent = '—'; return; }
+  try {
+    const todayKey = new Date().toISOString().slice(0,10);
+    await db.ref('siteViews').transaction(c => (c || 0) + 1);
+    await db.ref('viewsByDay/' + todayKey).transaction(c => (c || 0) + 1);
+    db.ref('siteViews').on('value', function(snap) {
+      if (el) el.textContent = (snap.val() || 1).toLocaleString();
+    });
+  } catch(e) {
+    console.warn('View counter error:', e);
+    if (el) el.textContent = '—';
+  }
+})();
 
 async function loadSubs() {
   if (db && firebaseConfig.apiKey !== 'PASTE_YOUR_API_KEY_HERE') {
@@ -1151,75 +1201,131 @@ async function adminLogin() {
   }
 }
 
-// ── Earnings ──
-function openEarnings() {
-  document.getElementById('earn-overlay').classList.add('show');
-  document.getElementById('earnLoginBox').style.display = 'block';
-  document.getElementById('earnDashboard').style.display = 'none';
-  document.getElementById('earnPassInput').value = '';
-  document.getElementById('earnErr').style.display = 'none';
+// ── Admin Tabs ──
+function switchAdminTab(tab, btn) {
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.admin-tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('adminTab-' + tab).classList.add('active');
+  if (tab === 'views') buildViewsDashboard();
+  if (tab === 'earnings') buildEarningsInline();
 }
-function closeEarnings() { document.getElementById('earn-overlay').classList.remove('show'); }
 
-async function earnLogin() {
-  if (document.getElementById('earnPassInput').value === PASS) {
-    document.getElementById('earnLoginBox').style.display = 'none';
-    document.getElementById('earnDashboard').style.display = 'block';
-    await loadSubs();
-    buildEarnings();
-  } else {
-    document.getElementById('earnErr').style.display = 'block';
+// ── Views Dashboard ──
+async function buildViewsDashboard() {
+  if (!db) {
+    document.getElementById('viewsLogList').innerHTML = '<div class="no-subs">Firebase not connected.</div>';
+    return;
+  }
+  try {
+    const snap = await db.ref('viewsByDay').once('value');
+    const data = snap.val() || {};
+    const totalSnap = await db.ref('siteViews').once('value');
+    const total = totalSnap.val() || 0;
+
+    // Sort dates
+    const dates = Object.keys(data).sort();
+    const last14 = dates.slice(-14);
+
+    // Stats
+    const todayKey = new Date().toISOString().slice(0,10);
+    const todayViews = data[todayKey] || 0;
+    const avg = dates.length ? Math.round(Object.values(data).reduce((a,b)=>a+b,0)/dates.length) : 0;
+
+    document.getElementById('vTotal').textContent = total.toLocaleString();
+    document.getElementById('vToday').textContent = todayViews.toLocaleString();
+    document.getElementById('vAvg').textContent = avg.toLocaleString();
+
+    // Chart
+    const opt = {
+      responsive:true,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#666',font:{family:'Nunito',size:11}},grid:{color:'rgba(0,0,0,.05)'}},
+        y:{ticks:{color:'#666',font:{family:'Nunito'}},grid:{color:'rgba(0,0,0,.07)'},beginAtZero:true}
+      }
+    };
+    if (charts.views) { charts.views.destroy(); }
+    charts.views = new Chart(document.getElementById('viewsChart'), {
+      type: 'bar',
+      data: {
+        labels: last14.length ? last14.map(d => d.slice(5)) : ['No data'],
+        datasets: [{
+          label: 'Views',
+          data: last14.length ? last14.map(d => data[d]) : [0],
+          backgroundColor: 'rgba(61,153,112,.75)',
+          borderColor: '#3d9970',
+          borderWidth: 2,
+          borderRadius: 7
+        }]
+      },
+      options: opt
+    });
+
+    // Log list (all days, newest first)
+    const logEl = document.getElementById('viewsLogList');
+    if (!dates.length) {
+      logEl.innerHTML = '<div class="no-subs">No view data yet.</div>';
+    } else {
+      logEl.innerHTML = [...dates].reverse().map(d =>
+        `<div class="views-log-row"><span class="views-log-date">${d}</span><span class="views-log-count">👀 ${data[d]}</span></div>`
+      ).join('');
+    }
+  } catch(e) {
+    console.warn('Views dashboard error:', e);
   }
 }
 
-function buildEarnings() {
+// ── Earnings (inline tab) ──
+function buildEarningsInline() {
   const confirmed = subs.filter(s=>s.status==='confirmed');
   const total = confirmed.reduce((a,s)=>a+(s.price||0),0);
   const walks = confirmed.length;
   const avg = walks ? (total/walks).toFixed(2) : '0.00';
 
-  document.getElementById('earnStats').innerHTML = `
-    <div class="earn-stat"><span class="earn-stat-val">$${total}</span><div class="earn-stat-lbl">Total Earned</div></div>
-    <div class="earn-stat"><span class="earn-stat-val">${walks}</span><div class="earn-stat-lbl">Total Walks</div></div>
-    <div class="earn-stat"><span class="earn-stat-val">$${avg}</span><div class="earn-stat-lbl">Avg Per Walk</div></div>
+  document.getElementById('earnStats2').innerHTML = `
+    <div class="views-stat"><span class="views-stat-val">$${total}</span><div class="views-stat-lbl">Total Earned</div></div>
+    <div class="views-stat"><span class="views-stat-val">${walks}</span><div class="views-stat-lbl">Total Walks</div></div>
+    <div class="views-stat"><span class="views-stat-val">$${avg}</span><div class="views-stat-lbl">Avg Per Walk</div></div>
   `;
 
   const byDate = {};
   confirmed.forEach(s=>{ const d=s.date||'?'; if(!byDate[d]) byDate[d]={w:0,e:0}; byDate[d].w++; byDate[d].e+=s.price||0; });
   const dates = Object.keys(byDate).sort();
-
   const payMap = {};
   confirmed.forEach(s=>{ const m=s.paymentMethod||'?'; payMap[m]=(payMap[m]||0)+1; });
 
   const opt = {
     responsive:true,
-    plugins:{legend:{labels:{color:'#ccc',font:{family:'Nunito',weight:'700'}}}},
-    scales:{x:{ticks:{color:'#999',font:{family:'Nunito'}},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#999',font:{family:'Nunito'}},grid:{color:'rgba(255,255,255,.08)'},beginAtZero:true}}
+    plugins:{legend:{labels:{color:'#555',font:{family:'Nunito',weight:'700'}}}},
+    scales:{x:{ticks:{color:'#666',font:{family:'Nunito'}},grid:{color:'rgba(0,0,0,.05)'}},y:{ticks:{color:'#666',font:{family:'Nunito'}},grid:{color:'rgba(0,0,0,.07)'},beginAtZero:true}}
   };
 
-  Object.values(charts).forEach(c=>c.destroy()); charts={};
+  if (charts.w2) charts.w2.destroy();
+  if (charts.e2) charts.e2.destroy();
+  if (charts.p2) charts.p2.destroy();
 
-  charts.w = new Chart(document.getElementById('walksChart'),{
+  charts.w2 = new Chart(document.getElementById('walksChart2'),{
     type:'bar',
     data:{labels:dates.length?dates:['No data'],datasets:[{label:'Walks',data:dates.length?dates.map(d=>byDate[d].w):[0],backgroundColor:'rgba(82,199,148,.7)',borderColor:'#52c794',borderWidth:2,borderRadius:8}]},
     options:opt
   });
-  charts.e = new Chart(document.getElementById('earningsChart'),{
+  charts.e2 = new Chart(document.getElementById('earningsChart2'),{
     type:'line',
-    data:{labels:dates.length?dates:['No data'],datasets:[{label:'Earnings ($)',data:dates.length?dates.map(d=>byDate[d].e):[0],borderColor:'#52c794',backgroundColor:'rgba(82,199,148,.15)',tension:.4,fill:true,pointBackgroundColor:'#52c794',pointRadius:5}]},
+    data:{labels:dates.length?dates:['No data'],datasets:[{label:'Earnings ($)',data:dates.length?dates.map(d=>byDate[d].e):[0],borderColor:'#3d9970',backgroundColor:'rgba(61,153,112,.12)',tension:.4,fill:true,pointBackgroundColor:'#3d9970',pointRadius:5}]},
     options:opt
   });
   const pl = Object.keys(payMap);
-  charts.p = new Chart(document.getElementById('payChart'),{
+  charts.p2 = new Chart(document.getElementById('payChart2'),{
     type:'doughnut',
     data:{labels:pl.length?pl:['No data'],datasets:[{data:pl.length?Object.values(payMap):[1],backgroundColor:['#52c794','#5dade2','#f39c12','#e74c3c'],borderWidth:0}]},
-    options:{responsive:true,plugins:{legend:{labels:{color:'#ccc',font:{family:'Nunito',weight:'700'}}}}}
+    options:{responsive:true,plugins:{legend:{labels:{color:'#555',font:{family:'Nunito',weight:'700'}}}}}
   });
 
-  const wl = document.getElementById('earnWalksList');
+  const wl = document.getElementById('earnWalksList2');
   wl.innerHTML = confirmed.length
-    ? confirmed.map(s=>`<div class="earn-walk-row"><div class="earn-walk-info"><strong>${s.dogName}</strong> (${s.ownerName}) · ${s.date} ${s.time} · ${s.walkLength==='30min'?'30':'20'} min · ${s.numDogs} dog · ${s.paymentMethod}</div><div class="earn-walk-amt">$${s.price}</div></div>`).join('')
-    : '<div style="color:#555;text-align:center;padding:16px;font-weight:700;">Confirm some walks to see them here!</div>';
+    ? confirmed.map(s=>`<div class="earn-walk-row" style="background:var(--green-pale);border-radius:12px;padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;"><div style="font-size:0.85rem;font-weight:600;color:var(--text);"><strong>${s.dogName}</strong> (${s.ownerName}) · ${s.date} ${s.time} · ${s.walkLength==='30min'?'30':'20'} min · ${s.numDogs} dog · ${s.paymentMethod}</div><div style="color:var(--green);font-weight:900;font-size:1rem;">$${s.price}</div></div>`).join('')
+    : '<div style="color:var(--muted);text-align:center;padding:16px;font-weight:700;">Confirm some walks to see them here!</div>';
 }
 </script>
 </body>
